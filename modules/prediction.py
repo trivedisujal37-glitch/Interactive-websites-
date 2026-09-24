@@ -25,6 +25,10 @@ def run_prediction(df: pd.DataFrame, future_periods: int = 7) -> dict:
     if total_obs < 14:
         return {"status": "Prediction unavailable", "reason": f"Insufficient observations: {total_obs}. Minimum 14 required."}
 
+    time_span = (df[COL_DATE].iloc[-1] - df[COL_DATE].iloc[0]).days
+    if time_span < 13:
+        return {"status": "Prediction unavailable", "reason": f"Unreasonable time coverage: spans {time_span} days, requires at least 14 days."}
+
     # Chronological split: 80% train, 20% test
     train_size = int(total_obs * 0.8)
     if train_size < 10 or (total_obs - train_size) < 4:
