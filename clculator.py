@@ -1,6 +1,7 @@
 
 
 n-int(input("enter the number"))
+#hello
 li=[]
 for i in range(n):
     k=int(input("enter the number"))
