@@ -35,3 +35,7 @@ Your last pass fixed test coverage and formulas well (12/12 passing with real py
 Re-run `pytest tests/ -v` after these changes and paste the full raw output again — it should now show more than 12 tests, all passing. Only mark a module PASS if this raw output actually confirms it.
 
 ponytail caveman
+
+Open tests/test_inventory.py and show me the full body of test_inventory_statuses(). Confirm it has a separate, explicit assertion for each of the 5 status values: "Low Stock", "Overstock", "Priority Review", "Review Required", "Sufficient". If any status isn't individually asserted, add the missing assertion(s) — don't just claim they're covered.
+
+ponytail caveman
