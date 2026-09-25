@@ -68,7 +68,8 @@ STEPS TO EXECUTE, IN ORDER
    ## Pending dependency (Section 11)
    `modules/optimization.py` has placeholder import hooks for Sujal's and
    Manthan's demand/prediction/supplier functions. Real module paths and
-   function names still needed from them — see README_ANSHU.md for the
+   function names still needed from them — 
+   see README_ANSHU.md for the
    exact contract.
 
    ## How to verify
