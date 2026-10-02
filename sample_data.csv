@@ -1,0 +1,8 @@
+Item,Category,Current Stock,Reorder Point,Max Stock Level,Unit Price,Purchase Cost,Holding Cost,Transportation Cost
+Widget A,Electronics,320,700,1000,25.0,8000.0,320.0,450.0
+Gadget B,Electronics,1200,300,800,45.0,54000.0,1200.0,750.0
+Component C,Hardware,450,400,900,12.5,5625.0,225.0,180.0
+Sensor D,Hardware,150,200,500,80.0,12000.0,300.0,250.0
+Battery E,Power,950,400,900,35.0,33250.0,950.0,400.0
+Cable F,Accessories,600,500,1500,8.0,4800.0,120.0,100.0
+Motor G,Power,80,150,400,110.0,8800.0,240.0,310.0
