@@ -133,12 +133,62 @@ def _detect_item_col(df: pd.DataFrame | None) -> str | None:
     return df.columns[0] if len(df.columns) > 0 else None
 
 
+# Cached computation functions to optimize app response time
+@st.cache_data(show_spinner=False)
+def get_cached_cost(df: pd.DataFrame | None, item_col: str | None = None, category_col: str | None = None):
+    return analyze_cost(df, item_col=item_col, category_col=category_col)
+
+
+@st.cache_data(show_spinner=False)
+def get_cached_optimization(df: pd.DataFrame | None, item_col: str | None = None):
+    return run_optimization(df, item_col=item_col)
+
+
+@st.cache_data(show_spinner=False)
+def get_cached_recommendations(findings: list[dict]):
+    return build_recommendations(findings)
+
+
+@st.cache_data(show_spinner=False)
+def get_cached_inventory(df: pd.DataFrame):
+    from modules.inventory import calculate_inventory
+    return calculate_inventory(df)
+
+
+@st.cache_data(show_spinner=False)
+def get_cached_demand(df: pd.DataFrame):
+    from modules.demand import analyze_demand
+    return analyze_demand(df)
+
+
+@st.cache_data(show_spinner=False)
+def get_cached_prediction(df: pd.DataFrame):
+    from modules.prediction import run_prediction
+    return run_prediction(df)
+
+
+@st.cache_data(show_spinner=False)
+def get_cached_supplier(df: pd.DataFrame):
+    from modules.supplier import analyze_supplier
+    return analyze_supplier(df)
+
+
+@st.cache_data(show_spinner=False)
+def get_cached_csv(df: pd.DataFrame | None) -> bytes | None:
+    return export_to_csv(df)
+
+
+@st.cache_data(show_spinner=False)
+def get_cached_excel(df: pd.DataFrame | None) -> bytes | None:
+    return export_to_excel(df)
+
+
 def _download_buttons(df: pd.DataFrame | None, base_name: str, key_prefix: str = ""):
     """Render download buttons for CSV and optionally Excel."""
     if df is None or df.empty:
         return
 
-    csv_data = export_to_csv(df)
+    csv_data = get_cached_csv(df)
     cols = st.columns([1, 1, 6])
     with cols[0]:
         if csv_data:
@@ -151,7 +201,7 @@ def _download_buttons(df: pd.DataFrame | None, base_name: str, key_prefix: str =
             )
     with cols[1]:
         if "xlsx" in get_available_export_formats():
-            excel_data = export_to_excel(df)
+            excel_data = get_cached_excel(df)
             if excel_data:
                 st.download_button(
                     label="📊 Download Excel",
@@ -250,7 +300,7 @@ elif page == "Dashboard":
         total_stock_kpi = "Unavailable"
 
     # Total Cost
-    cost_res = analyze_cost(df)
+    cost_res = get_cached_cost(df)
     if cost_res.available and "Total Combined Cost" in cost_res.totals:
         total_cost_kpi = f"{cost_res.totals['Total Combined Cost']:,.2f}"
     else:
@@ -259,7 +309,7 @@ elif page == "Dashboard":
     # Items Needing Reorder Review
     if df is not None and not df.empty:
         item_col = _detect_item_col(df) or "Item"
-        opt_res = run_optimization(df, item_col=item_col)
+        opt_res = get_cached_optimization(df, item_col=item_col)
         if opt_res.available:
             reorder_count = sum(
                 1 for f in opt_res.findings if f.get("finding_type") == "Reorder Review"
@@ -310,9 +360,8 @@ elif page == "Inventory Analysis":
     if df is None or df.empty:
         st.info("No data uploaded. Please upload a dataset in Data Management first.")
     else:
-        from modules.inventory import calculate_inventory
         try:
-            inv_df = calculate_inventory(df.copy())
+            inv_df = get_cached_inventory(df)
             st.dataframe(inv_df, use_container_width=True)
             _download_buttons(inv_df, "inventory_analysis", "inv")
         except Exception as e:
@@ -327,8 +376,7 @@ elif page == "Demand Analysis":
     if df is None or df.empty:
         st.info("No data uploaded. Please upload a dataset in Data Management first.")
     else:
-        from modules.demand import analyze_demand
-        res = analyze_demand(df.copy())
+        res = get_cached_demand(df)
         if res.get("status") == "success":
             metrics = res.get("metrics", {})
             st.subheader("Demand Metrics")
@@ -352,8 +400,7 @@ elif page == "Demand Prediction":
     if df is None or df.empty:
         st.info("No data uploaded. Please upload a dataset in Data Management first.")
     else:
-        from modules.prediction import run_prediction
-        res = run_prediction(df.copy())
+        res = get_cached_prediction(df)
         if res.get("status") == "success":
             st.subheader("Prediction Evaluation")
             eval_metrics = res.get("evaluation", {})
@@ -379,8 +426,7 @@ elif page == "Supplier Analysis":
     if df is None or df.empty:
         st.info("No data uploaded. Please upload a dataset in Data Management first.")
     else:
-        from modules.supplier import analyze_supplier
-        res = analyze_supplier(df.copy())
+        res = get_cached_supplier(df)
         if res.get("status") == "success":
             st.subheader("Supplier Overview")
             metrics = res.get("supplier_metrics", {})
@@ -408,7 +454,7 @@ elif page == "Cost Analysis":
         st.info("No data uploaded. Please upload a dataset in Data Management first.")
     else:
         item_col = _detect_item_col(df)
-        cost_res = analyze_cost(df, item_col=item_col)
+        cost_res = get_cached_cost(df, item_col=item_col)
 
         if not cost_res.available:
             st.warning(cost_res.message)
@@ -441,7 +487,7 @@ elif page == "Optimization":
         st.info("No data uploaded. Please upload a dataset in Data Management first.")
     else:
         item_col = _detect_item_col(df) or "Item"
-        opt_res = run_optimization(df, item_col=item_col)
+        opt_res = get_cached_optimization(df, item_col=item_col)
         st.session_state._last_optimization_findings = opt_res.findings
 
         if not opt_res.available:
@@ -468,10 +514,10 @@ elif page == "Recommendations":
     else:
         item_col = _detect_item_col(df) or "Item"
         if st.session_state._last_optimization_findings is None:
-            opt_res = run_optimization(df, item_col=item_col)
+            opt_res = get_cached_optimization(df, item_col=item_col)
             st.session_state._last_optimization_findings = opt_res.findings
 
-        rec_res = build_recommendations(st.session_state._last_optimization_findings)
+        rec_res = get_cached_recommendations(st.session_state._last_optimization_findings)
 
         if not rec_res.available:
             st.info(rec_res.message)
@@ -514,7 +560,7 @@ elif page == "Reporting":
 
         # 2. Cost Analysis Summary
         st.subheader("2. Cost Findings")
-        cost_res = analyze_cost(df, item_col=item_col)
+        cost_res = get_cached_cost(df, item_col=item_col)
         if cost_res.available:
             metric_cols = st.columns(len(cost_res.totals))
             for i, (k, v) in enumerate(cost_res.totals.items()):
@@ -526,7 +572,7 @@ elif page == "Reporting":
 
         # 3. Optimization Findings
         st.subheader("3. Optimization Findings")
-        opt_res = run_optimization(df, item_col=item_col)
+        opt_res = get_cached_optimization(df, item_col=item_col)
         st.session_state._last_optimization_findings = opt_res.findings
         if opt_res.available and opt_res.findings:
             st.dataframe(opt_res.findings_df, use_container_width=True)
@@ -536,7 +582,7 @@ elif page == "Reporting":
 
         # 4. Recommendation Findings
         st.subheader("4. Actionable Recommendations")
-        rec_res = build_recommendations(opt_res.findings)
+        rec_res = get_cached_recommendations(opt_res.findings)
         if rec_res.available and rec_res.recommendations:
             st.dataframe(rec_res.recommendations_df, use_container_width=True)
             _download_buttons(rec_res.recommendations_df, "report_recommendations", "rep_rec")

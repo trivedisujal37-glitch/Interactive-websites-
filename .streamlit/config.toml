@@ -5,3 +5,10 @@ backgroundColor = "#f5f6f8"
 secondaryBackgroundColor = "#ffffff"
 textColor = "#111827"
 font = "sans serif"
+
+[runner]
+fastReruns = true
+
+[server]
+enableCORS = false
+enableXsrfProtection = false
