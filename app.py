@@ -104,6 +104,31 @@ st.markdown("""
     section[data-testid="stSidebar"] {
         display: none;
     }
+
+    /* Move page content & navigation to the top (eliminating the large top gap) */
+    .main .block-container {
+        padding-top: 0.6rem !important;
+        padding-bottom: 2rem !important;
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+        max-width: 98% !important;
+    }
+
+    /* Streamlit header & toolbar styling: align toolbar into the navbar row */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+        height: auto !important;
+        pointer-events: none !important;
+        z-index: 999;
+    }
+
+    [data-testid="stToolbar"] {
+        position: fixed !important;
+        top: 0.85rem !important;
+        right: 2.2rem !important;
+        pointer-events: auto !important;
+        z-index: 1000 !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -186,7 +211,17 @@ page = option_menu(
     default_index=0,
     orientation="horizontal",
     styles={
-        "container": {"padding": "0!important", "background-color": "#ffffff", "border-radius": "16px", "margin-bottom": "30px", "display": "flex", "flex-wrap": "wrap", "justify-content": "center", "box-shadow": "0 2px 5px rgba(0,0,0,0.05)", "border": "1px solid #e5e7eb"},
+        "container": {
+            "padding": "4px 130px 4px 10px !important",
+            "background-color": "#ffffff",
+            "border-radius": "16px",
+            "margin-bottom": "25px",
+            "display": "flex",
+            "flex-wrap": "wrap",
+            "justify-content": "center",
+            "box-shadow": "0 2px 5px rgba(0,0,0,0.05)",
+            "border": "1px solid #e5e7eb",
+        },
         "icon": {"color": "#16a34a", "font-size": "16px"}, 
         "nav-link": {"font-size": "13px", "text-align": "center", "margin":"5px", "color": "#4b5563", "--hover-color": "rgba(22, 163, 74, 0.1)"},
         "nav-link-selected": {"background-color": "#16a34a", "color": "white", "font-weight": "bold"},
