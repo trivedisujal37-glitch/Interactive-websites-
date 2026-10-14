@@ -812,23 +812,23 @@ elif page in ["Home", "Dashboard"]:
                     <div class="stages-metrics-row">
                         <div class="stage-col">
                             <div class="stage-label">Supplier Procure</div>
-                            <div class="stage-val">{z_metrics['stage_s1']}</div>
+                            <div class="stage-val">{z_metrics.get('stage_s1', '65.2k')}</div>
                         </div>
                         <div class="stage-col">
                             <div class="stage-label">Inventory</div>
-                            <div class="stage-val">{z_metrics['stage_s2']}</div>
+                            <div class="stage-val">{z_metrics.get('stage_s2', '54.8k')}</div>
                         </div>
                         <div class="stage-col active-stage">
                             <div class="stage-label">Logistics</div>
-                            <div class="stage-val">{z_metrics['stage_s3']}</div>
+                            <div class="stage-val">{z_metrics.get('stage_s3', '48.6k')}</div>
                         </div>
                         <div class="stage-col">
                             <div class="stage-label">Warehousing</div>
-                            <div class="stage-val">{z_metrics['stage_s4']}</div>
+                            <div class="stage-val">{z_metrics.get('stage_s4', '38.3k')}</div>
                         </div>
                         <div class="stage-col">
                             <div class="stage-label">Finished</div>
-                            <div class="stage-val">{z_metrics['stage_s5']}</div>
+                            <div class="stage-val">{z_metrics.get('stage_s5', '32.9k')}</div>
                         </div>
                     </div>
                 """, unsafe_allow_html=True)
@@ -857,34 +857,34 @@ elif page in ["Home", "Dashboard"]:
                     </div>
                     <div class="gross-spend-label">Gross Spend</div>
                     <div class="gross-spend-metric-row">
-                        <span class="gross-spend-num">{z_metrics['gross_spend_str']}</span>
-                        <span class="gross-spend-delta">{z_metrics['gross_spend_delta']}</span>
+                        <span class="gross-spend-num">{z_metrics.get('gross_spend_str', '$41,540')}</span>
+                        <span class="gross-spend-delta">{z_metrics.get('gross_spend_delta', '▲ 15%')}</span>
                     </div>
                     <div class="spend-bar-row">
                         <div class="spend-bar-head">
                             <span class="spend-bar-title">Procurement</span>
-                            <span class="spend-bar-amount">{z_metrics['procurement_str']}</span>
+                            <span class="spend-bar-amount">{z_metrics.get('procurement_str', '$26,800')}</span>
                         </div>
                         <div class="progress-track">
-                            <div class="progress-fill fill-green" style="width: {z_metrics['procurement_pct']}%;"></div>
+                            <div class="progress-fill fill-green" style="width: {z_metrics.get('procurement_pct', 65)}%;"></div>
                         </div>
                     </div>
                     <div class="spend-bar-row">
                         <div class="spend-bar-head">
                             <span class="spend-bar-title">Distribution</span>
-                            <span class="spend-bar-amount">{z_metrics['distribution_str']}</span>
+                            <span class="spend-bar-amount">{z_metrics.get('distribution_str', '$10,400')}</span>
                         </div>
                         <div class="progress-track">
-                            <div class="progress-fill fill-cyan" style="width: {z_metrics['distribution_pct']}%;"></div>
+                            <div class="progress-fill fill-cyan" style="width: {z_metrics.get('distribution_pct', 25)}%;"></div>
                         </div>
                     </div>
                     <div class="spend-bar-row" style="margin-bottom: 24px;">
                         <div class="spend-bar-head">
                             <span class="spend-bar-title">Operations</span>
-                            <span class="spend-bar-amount">{z_metrics['operations_str']}</span>
+                            <span class="spend-bar-amount">{z_metrics.get('operations_str', '$4,340')}</span>
                         </div>
                         <div class="progress-track">
-                            <div class="progress-fill fill-pink" style="width: {z_metrics['operations_pct']}%;"></div>
+                            <div class="progress-fill fill-pink" style="width: {z_metrics.get('operations_pct', 10)}%;"></div>
                         </div>
                     </div>
                 """, unsafe_allow_html=True)
@@ -918,7 +918,7 @@ elif page in ["Home", "Dashboard"]:
                         </div>
                         <div class="submetric-body">
                             <div class="submetric-left">
-                                <div class="submetric-num">{z_metrics['transactions_str']}</div>
+                                <div class="submetric-num">{z_metrics.get('transactions_str', '106k')}</div>
                             </div>
                             <div class="equalizer-bars cyan-bars">
                                 <span style="height: 10px;"></span><span style="height: 18px;"></span>
@@ -930,7 +930,7 @@ elif page in ["Home", "Dashboard"]:
                             </div>
                             <div class="submetric-delta-box">
                                 <div class="submetric-delta-lbl">vs last period</div>
-                                <div class="submetric-delta-val">{z_metrics['transactions_delta']}</div>
+                                <div class="submetric-delta-val">{z_metrics.get('transactions_delta', '+34,002')}</div>
                             </div>
                         </div>
                     </div>
@@ -941,7 +941,7 @@ elif page in ["Home", "Dashboard"]:
                         </div>
                         <div class="submetric-body">
                             <div class="submetric-left">
-                                <div class="submetric-num">{z_metrics['suppliers_active_str']}</div>
+                                <div class="submetric-num">{z_metrics.get('suppliers_active_str', '1,284')}</div>
                             </div>
                             <div class="equalizer-bars blue-bars">
                                 <span style="height: 12px;"></span><span style="height: 22px;"></span>
@@ -952,7 +952,7 @@ elif page in ["Home", "Dashboard"]:
                             </div>
                             <div class="submetric-delta-box">
                                 <div class="submetric-delta-lbl">vs last period</div>
-                                <div class="submetric-delta-val">{z_metrics['suppliers_active_delta']}</div>
+                                <div class="submetric-delta-val">{z_metrics.get('suppliers_active_delta', '+320')}</div>
                             </div>
                         </div>
                     </div>
@@ -965,7 +965,7 @@ elif page in ["Home", "Dashboard"]:
                     <div class="ai-insight-card">
                         <div>
                             <span class="ai-insight-pill">💡 Supply AI insights</span>
-                            <div class="ai-insight-big-stat">{z_metrics['accuracy_str']}</div>
+                            <div class="ai-insight-big-stat">{z_metrics.get('accuracy_str', '75%')}</div>
                             <div class="ai-insight-text">
                                 Supply accuracy increased by <b>4%</b> compared to last week.
                             </div>
@@ -977,6 +977,7 @@ elif page in ["Home", "Dashboard"]:
                         </div>
                     </div>
                 """, unsafe_allow_html=True)
+
 
         # -------------------------------------------------------------
         # EXPANDABLE MULTI-CHART ANALYTICS & SLICERS
