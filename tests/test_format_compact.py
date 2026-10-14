@@ -69,3 +69,24 @@ def test_format_full_value():
     assert format_full_value(74876.4) == "74,876.40"
     assert format_full_value(None) == "-"
     assert format_full_value(float("nan")) == "-"
+
+
+def test_four_plus_digit_k_and_m_formatting():
+    """Verify numbers with more than 3 or 4 digits format with K and M for Reporting."""
+    # 4 digits (thousands)
+    assert format_compact(1000) == "1K"
+    assert format_compact(1500) == "1.5K"
+    assert format_compact(9999) == "10K"
+    assert format_compact(24000) == "24K"
+    assert format_compact(74876.90) == "74.9K"
+    
+    # 6-7 digits (millions)
+    assert format_compact(1000000) == "1M"
+    assert format_compact(1782443.00) == "1.78M"
+    assert format_compact(1904243.90) == "1.9M"
+    assert format_compact(45000000) == "45M"
+    
+    # Tooltip exact values are preserved
+    assert format_full_value(1782443.00) == "1,782,443"
+    assert format_full_value(74876.90) == "74,876.90"
+

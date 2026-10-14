@@ -3,6 +3,7 @@
 Anshu's portion: Cost Analysis, Optimization, Recommendations, Reporting, Export & App Integration.
 """
 
+import html
 import pandas as pd
 import streamlit as st
 
@@ -1016,13 +1017,13 @@ elif page in ["Home", "Dashboard"]:
                     </div>
                     <div class="gross-spend-label">Gross Spend</div>
                     <div class="gross-spend-metric-row">
-                        <span class="gross-spend-num">{z_metrics.get('gross_spend_str', '$41,540')}</span>
+                        <span class="gross-spend-num">{z_metrics.get('gross_spend_str', '$41.5K')}</span>
                         <span class="gross-spend-delta">{z_metrics.get('gross_spend_delta', '▲ 15%')}</span>
                     </div>
                     <div class="spend-bar-row">
                         <div class="spend-bar-head">
                             <span class="spend-bar-title">Procurement</span>
-                            <span class="spend-bar-amount">{z_metrics.get('procurement_str', '$26,800')}</span>
+                            <span class="spend-bar-amount">{z_metrics.get('procurement_str', '$26.8K')}</span>
                         </div>
                         <div class="progress-track">
                             <div class="progress-fill fill-green" style="width: {z_metrics.get('procurement_pct', 65)}%;"></div>
@@ -1031,7 +1032,7 @@ elif page in ["Home", "Dashboard"]:
                     <div class="spend-bar-row">
                         <div class="spend-bar-head">
                             <span class="spend-bar-title">Distribution</span>
-                            <span class="spend-bar-amount">{z_metrics.get('distribution_str', '$10,400')}</span>
+                            <span class="spend-bar-amount">{z_metrics.get('distribution_str', '$10.4K')}</span>
                         </div>
                         <div class="progress-track">
                             <div class="progress-fill fill-cyan" style="width: {z_metrics.get('distribution_pct', 25)}%;"></div>
@@ -1040,7 +1041,7 @@ elif page in ["Home", "Dashboard"]:
                     <div class="spend-bar-row" style="margin-bottom: 24px;">
                         <div class="spend-bar-head">
                             <span class="spend-bar-title">Operations</span>
-                            <span class="spend-bar-amount">{z_metrics.get('operations_str', '$4,340')}</span>
+                            <span class="spend-bar-amount">{z_metrics.get('operations_str', '$4.3K')}</span>
                         </div>
                         <div class="progress-track">
                             <div class="progress-fill fill-pink" style="width: {z_metrics.get('operations_pct', 10)}%;"></div>
@@ -1089,7 +1090,7 @@ elif page in ["Home", "Dashboard"]:
                             </div>
                             <div class="submetric-delta-box">
                                 <div class="submetric-delta-lbl">vs last period</div>
-                                <div class="submetric-delta-val">{z_metrics.get('transactions_delta', '+34,002')}</div>
+                                <div class="submetric-delta-val">{z_metrics.get('transactions_delta', '+34K')}</div>
                             </div>
                         </div>
                     </div>
@@ -1100,7 +1101,7 @@ elif page in ["Home", "Dashboard"]:
                         </div>
                         <div class="submetric-body">
                             <div class="submetric-left">
-                                <div class="submetric-num">{z_metrics.get('suppliers_active_str', '1,284')}</div>
+                                <div class="submetric-num">{z_metrics.get('suppliers_active_str', '1.3K')}</div>
                             </div>
                             <div class="equalizer-bars blue-bars">
                                 <span style="height: 12px;"></span><span style="height: 22px;"></span>
@@ -1409,11 +1410,17 @@ elif page == "Demand Prediction":
             eval_metrics = res.get("evaluation", {})
             counts = res.get("observation_counts", {})
             
+            from modules.ui_charts import format_compact, format_full_value
+            mae_v = eval_metrics.get('mae', 0)
+            rmse_v = eval_metrics.get('rmse', 0)
+            tot_obs = counts.get("total", 0)
+            test_obs = counts.get("test", 0)
+
             c1, c2, c3, c4 = st.columns(4)
-            c1.metric("MAE (Error)", f"{eval_metrics.get('mae', 0):,.2f}")
-            c2.metric("RMSE (Error)", f"{eval_metrics.get('rmse', 0):,.2f}")
-            c3.metric("Total Observations", counts.get("total", 0))
-            c4.metric("Test Set Size", counts.get("test", 0))
+            c1.metric("MAE (Error)", format_compact(mae_v), help=f"Exact Value: {format_full_value(mae_v)}")
+            c2.metric("RMSE (Error)", format_compact(rmse_v), help=f"Exact Value: {format_full_value(rmse_v)}")
+            c3.metric("Total Observations", format_compact(tot_obs), help=f"Exact Value: {format_full_value(tot_obs)}")
+            c4.metric("Test Set Size", format_compact(test_obs), help=f"Exact Value: {format_full_value(test_obs)}")
             
             with st.expander("View Full Prediction Output"):
                 st.json(res)
@@ -1653,20 +1660,25 @@ elif page == "Reporting":
 
 
 
+        from modules.ui_charts import format_compact, format_full_value
+
         # 1. Dataset Summary
         st.subheader("1. Dataset Summary")
         c1, c2, c3 = st.columns(3)
         
-        def kpi_card(title, value):
+        def kpi_card(title, value, tooltip=""):
+            tip_attr = f' title="Exact Value: {html.escape(str(tooltip))}"' if tooltip else ""
             return f"""
-            <div style="background: rgba(17, 23, 38, 0.75); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 18px 22px; margin-bottom: 12px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px); transition: all 0.25s ease;">
+            <div{tip_attr} style="background: rgba(17, 23, 38, 0.75); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 18px 22px; margin-bottom: 12px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px); transition: all 0.25s ease; cursor: default;">
                 <p style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin: 0 0 6px 0;">{title}</p>
                 <p style="font-size: 26px; font-weight: 800; color: #FFFFFF; margin: 0; letter-spacing: -0.03em; text-shadow: 0 0 16px rgba(16, 185, 129, 0.15);">{value}</p>
             </div>
             """
 
-        c1.markdown(kpi_card("Total Rows", len(df)), unsafe_allow_html=True)
-        c2.markdown(kpi_card("Total Columns", len(df.columns)), unsafe_allow_html=True)
+        row_count = len(df)
+        col_count = len(df.columns)
+        c1.markdown(kpi_card("Total Rows", format_compact(row_count), format_full_value(row_count)), unsafe_allow_html=True)
+        c2.markdown(kpi_card("Total Columns", format_compact(col_count) if col_count >= 1000 else col_count, format_full_value(col_count)), unsafe_allow_html=True)
         c3.markdown(kpi_card("Dataset", st.session_state.dataset_name or "In-Memory"), unsafe_allow_html=True)
 
         # 2. Cost Analysis Summary
@@ -1675,7 +1687,9 @@ elif page == "Reporting":
         if cost_res.available:
             metric_cols = st.columns(len(cost_res.totals))
             for i, (k, v) in enumerate(cost_res.totals.items()):
-                metric_cols[i].markdown(kpi_card(k, f"{v:,.2f}"), unsafe_allow_html=True)
+                compact_v = format_compact(v)
+                full_v = format_full_value(v)
+                metric_cols[i].markdown(kpi_card(k, compact_v, tooltip=full_v), unsafe_allow_html=True)
             if cost_res.item_level is not None:
                 _download_buttons(cost_res.item_level, "report_cost_item_level", "rep_cost")
         else:

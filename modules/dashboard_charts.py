@@ -382,7 +382,7 @@ def calc_k3_items_needing_attention(inv_df: pd.DataFrame) -> tuple[int | None, s
         return None, "Unavailable"
     needing = inv_df["Inventory_Status"].isin(["Low Stock", "Priority Review", "Review Required", "Reorder Review"])
     count = int(needing.sum())
-    return count, str(count)
+    return count, format_compact(count) if count >= 1000 else str(count)
 
 
 def calc_k4_average_lead_time(supplier_df: pd.DataFrame) -> tuple[float | None, str]:
@@ -403,7 +403,7 @@ def calc_k5_total_items(snapshot_df: pd.DataFrame) -> tuple[int | None, str]:
         return None, "Unavailable"
     id_col = "Item_ID" if "Item_ID" in snapshot_df.columns else ("Item_Name" if "Item_Name" in snapshot_df.columns else snapshot_df.columns[0])
     count = int(snapshot_df[id_col].nunique())
-    return count, str(count)
+    return count, format_compact(count) if count >= 1000 else str(count)
 
 
 def calc_k6_total_units_stock(snapshot_df: pd.DataFrame) -> tuple[float | None, str]:
@@ -449,7 +449,7 @@ def calc_k9_overstock_items(inv_df: pd.DataFrame) -> tuple[int | None, str]:
         return None, "Unavailable"
     overstock = inv_df["Inventory_Status"].isin(["Overstock", "Overstock Review"])
     count = int(overstock.sum())
-    return count, str(count)
+    return count, format_compact(count) if count >= 1000 else str(count)
 
 
 # -----------------------------------------------------------------------------
@@ -1186,7 +1186,7 @@ def plot_zentra_payments_and_costs(df: pd.DataFrame | None = None) -> ChartResul
     fig.add_annotation(
         x="Logistics",
         y=base_vals[2] * 0.95,
-        text="<b>48.6k trans</b> | Efficiency: <span style='color:#10b981;'>89%</span> | Drop-off: <span style='color:#94a3b8;'>-11%</span>",
+        text=f"<b>{base_vals[2]:.1f}k trans</b> | Efficiency: <span style='color:#10b981;'>89%</span> | Drop-off: <span style='color:#94a3b8;'>-11%</span>",
         showarrow=False,
         bgcolor="rgba(11, 15, 23, 0.92)",
         bordercolor="#10b981",
@@ -1370,18 +1370,18 @@ def calc_zentra_metrics(df: pd.DataFrame | None = None) -> dict[str, Any]:
     o_pct = min(100, int((operations / denom) * 100)) if gross_spend > 0 else 10
 
     return {
-        "gross_spend_str": f"${gross_spend:,.0f}" if gross_spend > 0 else "$0",
+        "gross_spend_str": format_compact(gross_spend, prefix="$") if gross_spend > 0 else "$0",
         "gross_spend_delta": "▲ 15%",
-        "procurement_str": f"${procurement:,.0f}" if procurement > 0 else "$0",
+        "procurement_str": format_compact(procurement, prefix="$") if procurement > 0 else "$0",
         "procurement_pct": p_pct,
-        "distribution_str": f"${distribution:,.0f}" if distribution > 0 else "$0",
+        "distribution_str": format_compact(distribution, prefix="$") if distribution > 0 else "$0",
         "distribution_pct": d_pct,
-        "operations_str": f"${operations:,.0f}" if operations > 0 else "$0",
+        "operations_str": format_compact(operations, prefix="$") if operations > 0 else "$0",
         "operations_pct": o_pct,
-        "transactions_str": f"{int(transactions / 1000)}k" if transactions >= 1000 else str(transactions),
-        "transactions_delta": f"+{max(1, int(transactions * 0.15)):,}",
-        "suppliers_active_str": f"{suppliers_active:,}",
-        "suppliers_active_delta": f"+{max(1, int(suppliers_active * 0.1)):,}",
+        "transactions_str": format_compact(transactions) if transactions >= 1000 else str(transactions),
+        "transactions_delta": f"+{format_compact(max(1, int(transactions * 0.15)))}" if max(1, int(transactions * 0.15)) >= 1000 else f"+{max(1, int(transactions * 0.15))}",
+        "suppliers_active_str": format_compact(suppliers_active) if suppliers_active >= 1000 else str(suppliers_active),
+        "suppliers_active_delta": f"+{format_compact(max(1, int(suppliers_active * 0.1)))}" if max(1, int(suppliers_active * 0.1)) >= 1000 else f"+{max(1, int(suppliers_active * 0.1))}",
         "accuracy_str": f"{accuracy}%",
         "stage_s1": f"{base_vals[0]:.1f}k" if base_vals[0] >= 1 else f"{base_vals[0]}",
         "stage_s2": f"{base_vals[1]:.1f}k" if base_vals[1] >= 1 else f"{base_vals[1]}",
