@@ -866,7 +866,7 @@ if page == "Data Management":
 
     st.caption(
         "Note: Dataset validation, cleansing, and schema checking are owned by "
-        "teammates (Sujal/Manthan) and will be integrated here."
+        "teammates (Sujal/Manthan/Anshu) and will be integrated here."
     )
 
 # -------------------------------------------------------------
