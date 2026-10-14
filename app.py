@@ -22,21 +22,21 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-    /* Global Obsidian Theme */
+    /* Global Obsidian Canvas & Typography System */
     html, body, [class*="css"], .stApp {
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     }
     .stApp {
-        background-color: #0b0f17 !important;
+        background-color: #090D16 !important;
         background-image:
-            radial-gradient(circle at 10% 12%, rgba(0, 212, 255, 0.05) 0%, transparent 40%),
-            radial-gradient(circle at 90% 18%, rgba(236, 72, 153, 0.04) 0%, transparent 40%),
-            radial-gradient(circle at 50% 85%, rgba(59, 130, 246, 0.03) 0%, transparent 50%) !important;
-        color: #e2e8f0 !important;
+            radial-gradient(circle at 15% 10%, rgba(16, 185, 129, 0.07) 0%, transparent 45%),
+            radial-gradient(circle at 85% 15%, rgba(0, 242, 254, 0.06) 0%, transparent 40%),
+            radial-gradient(circle at 50% 90%, rgba(139, 92, 246, 0.05) 0%, transparent 50%) !important;
+        color: #E2E8F0 !important;
     }
     .block-container {
-        padding-top: 1rem !important;
-        padding-bottom: 2rem !important;
+        padding-top: 1.2rem !important;
+        padding-bottom: 2.5rem !important;
         max-width: 98% !important;
     }
 
@@ -45,20 +45,36 @@ st.markdown("""
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 4px 6px 14px 6px;
-        margin-bottom: 4px;
+        padding: 6px 8px 16px 8px;
+        margin-bottom: 8px;
     }
     .zentra-brand {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
         text-decoration: none;
     }
+    .zentra-logo-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
     .zentra-brand-text {
-        font-size: 1.45rem;
+        font-size: 1.35rem;
         font-weight: 800;
         letter-spacing: -0.5px;
-        color: #ffffff;
+        color: #FFFFFF;
+    }
+    .pro-badge {
+        background: rgba(16, 185, 129, 0.12);
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        color: #10B981;
+        font-size: 0.64rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        padding: 3px 8px;
+        border-radius: 6px;
+        margin-left: 2px;
     }
     .zentra-header-right {
         display: flex;
@@ -69,31 +85,32 @@ st.markdown("""
         width: 38px;
         height: 38px;
         border-radius: 50%;
-        background: rgba(22, 30, 48, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(17, 23, 38, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #94a3b8;
+        color: #94A3B8;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
     }
     .zentra-tool-btn:hover {
-        background: rgba(30, 41, 65, 0.95);
-        color: #ffffff;
-        border-color: rgba(0, 212, 255, 0.4);
-        box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
+        background: rgba(22, 30, 48, 0.95);
+        color: #FFFFFF;
+        border-color: rgba(16, 185, 129, 0.4);
+        box-shadow: 0 0 16px rgba(16, 185, 129, 0.25);
+        transform: translateY(-1px);
     }
-    .red-dot {
+    .green-dot {
         position: absolute;
         top: 8px;
         right: 8px;
         width: 6px;
         height: 6px;
-        background: #ef4444;
+        background: #10B981;
         border-radius: 50%;
-        box-shadow: 0 0 6px #ef4444;
+        box-shadow: 0 0 8px #10B981;
     }
     .zentra-avatar-pill {
         display: flex;
@@ -103,30 +120,31 @@ st.markdown("""
         width: 38px;
         height: 38px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #f59e0b 0%, #ec4899 50%, #00d4ff 100%);
+        background: linear-gradient(135deg, #10B981 0%, #00F2FE 50%, #8B5CF6 100%);
         padding: 2px;
-        box-shadow: 0 0 10px rgba(0, 212, 255, 0.25);
+        box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 13px;
         font-weight: 800;
-        color: #ffffff;
+        color: #FFFFFF;
     }
 
-    /* Glass Cards */
+    /* Elevated Glassmorphic Slate Cards (Specification 1) */
     div[data-testid="stVerticalBlockBorderWrapper"], .zentra-glass-card {
-        background: rgba(18, 24, 38, 0.72) !important;
+        background: rgba(17, 23, 38, 0.75) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 20px !important;
-        box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+        box-shadow: 0 14px 40px -10px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
         backdrop-filter: blur(16px) !important;
-        padding: 14px 18px !important;
-        transition: all 0.25s ease !important;
+        padding: 16px 20px !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
     div[data-testid="stVerticalBlockBorderWrapper"]:hover, .zentra-glass-card:hover {
-        border-color: rgba(0, 212, 255, 0.22) !important;
-        box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.75), 0 0 20px rgba(0, 212, 255, 0.06) !important;
+        border-color: rgba(16, 185, 129, 0.3) !important;
+        box-shadow: 0 18px 45px -10px rgba(0, 0, 0, 0.75), 0 0 25px rgba(16, 185, 129, 0.08) !important;
+        transform: translateY(-1px) !important;
     }
 
     /* Overview Header */
@@ -134,7 +152,7 @@ st.markdown("""
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin: 6px 0 18px 0;
+        margin: 6px 0 20px 0;
         flex-wrap: wrap;
         gap: 12px;
     }
@@ -146,20 +164,9 @@ st.markdown("""
     .overview-title {
         font-size: 2.1rem;
         font-weight: 800;
-        color: #ffffff;
+        color: #FFFFFF;
         margin: 0;
         letter-spacing: -0.8px;
-    }
-    .overview-link-icon {
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.07);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        color: #94a3b8;
     }
     .overview-ctrls-wrap {
         display: flex;
@@ -167,30 +174,40 @@ st.markdown("""
         gap: 10px;
     }
     .ctrl-pill-btn {
-        background: rgba(18, 24, 38, 0.75);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(17, 23, 38, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 9999px;
         padding: 6px 14px;
         font-size: 0.8rem;
         font-weight: 600;
-        color: #cbd5e1;
+        color: #CBD5E1;
         display: flex;
         align-items: center;
         gap: 6px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        transition: all 0.2s ease;
+    }
+    .ctrl-pill-btn:hover {
+        border-color: rgba(16, 185, 129, 0.35);
+        color: #FFFFFF;
     }
     .date-range-pill {
-        color: #94a3b8;
+        color: #94A3B8;
     }
     .vs-badge {
-        color: #64748b;
+        color: #10B981;
         font-size: 0.72rem;
+        font-weight: 700;
         padding: 0 4px;
     }
     .add-widget-btn {
-        background: rgba(24, 32, 52, 0.9);
-        border: 1px solid rgba(0, 212, 255, 0.35);
-        color: #00d4ff;
+        background: rgba(16, 185, 129, 0.12);
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        color: #10B981;
+    }
+    .add-widget-btn:hover {
+        background: rgba(16, 185, 129, 0.22);
+        box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
     }
 
     /* Card Elements */
@@ -198,20 +215,24 @@ st.markdown("""
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 12px;
+        margin-bottom: 14px;
     }
     .card-main-title {
-        color: #ffffff;
+        color: #FFFFFF;
         font-size: 1.05rem;
         font-weight: 700;
         letter-spacing: -0.2px;
     }
     .card-dots-btn {
-        color: #64748b;
+        color: #64748B;
         font-size: 1.1rem;
         cursor: pointer;
         padding: 0 4px;
         line-height: 1;
+        transition: color 0.2s ease;
+    }
+    .card-dots-btn:hover {
+        color: #10B981;
     }
 
     /* 5 Stages Metrics Row */
@@ -219,7 +240,7 @@ st.markdown("""
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
-        padding: 0 12px 8px 12px;
+        padding: 0 12px 10px 12px;
     }
     .stage-col {
         display: flex;
@@ -229,63 +250,69 @@ st.markdown("""
     }
     .stage-label {
         font-size: 0.75rem;
-        font-weight: 500;
-        color: #94a3b8;
+        font-weight: 600;
+        color: #94A3B8;
         margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
     .stage-val {
         font-size: 1.25rem;
         font-weight: 800;
-        color: #ffffff;
+        color: #FFFFFF;
+        letter-spacing: -0.02em;
     }
     .active-stage .stage-label {
-        color: #00d4ff !important;
+        color: #10B981 !important;
         font-weight: 700;
     }
     .active-stage .stage-val {
-        color: #00d4ff !important;
-        text-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
+        color: #10B981 !important;
+        text-shadow: 0 0 14px rgba(16, 185, 129, 0.6);
     }
 
     /* AI Exploration Pill Bar */
     .ai-explore-wrap {
-        background: linear-gradient(180deg, rgba(16, 22, 36, 0.85) 0%, rgba(10, 14, 24, 0.95) 100%);
-        border: 1px solid rgba(0, 212, 255, 0.3);
+        background: linear-gradient(180deg, rgba(17, 23, 38, 0.9) 0%, rgba(10, 14, 24, 0.95) 100%);
+        border: 1px solid rgba(16, 185, 129, 0.35);
         border-radius: 14px;
         padding: 10px 14px;
         margin-top: 10px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(0, 212, 255, 0.2);
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(16, 185, 129, 0.2);
     }
     .ai-explore-label {
         font-size: 0.76rem;
-        font-weight: 600;
-        color: #93c5fd;
+        font-weight: 700;
+        color: #10B981;
         margin-bottom: 6px;
         display: flex;
         align-items: center;
         gap: 6px;
+        letter-spacing: 0.02em;
     }
     .ai-explore-input-pill {
-        background: rgba(8, 12, 20, 0.9);
+        background: rgba(9, 13, 22, 0.95);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 10px;
         padding: 8px 14px;
         font-size: 0.82rem;
-        color: #cbd5e1;
+        color: #CBD5E1;
         display: flex;
         justify-content: space-between;
         align-items: center;
     }
     .ai-explore-chevron {
-        color: #64748b;
+        color: #10B981;
         font-weight: bold;
     }
 
     /* Gross Spend Card */
     .gross-spend-label {
-        font-size: 0.82rem;
-        font-weight: 600;
-        color: #94a3b8;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #94A3B8;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
         margin-bottom: 2px;
     }
     .gross-spend-metric-row {
@@ -297,15 +324,15 @@ st.markdown("""
     .gross-spend-num {
         font-size: 2.7rem;
         font-weight: 800;
-        color: #fbbf24;
-        letter-spacing: -1px;
-        text-shadow: 0 0 20px rgba(251, 191, 36, 0.25);
+        color: #10B981;
+        letter-spacing: -1.2px;
+        text-shadow: 0 0 24px rgba(16, 185, 129, 0.3);
         line-height: 1.1;
     }
     .gross-spend-delta {
-        background: rgba(34, 197, 94, 0.15);
-        color: #22c55e;
-        border: 1px solid rgba(34, 197, 94, 0.35);
+        background: rgba(16, 185, 129, 0.15);
+        color: #10B981;
+        border: 1px solid rgba(16, 185, 129, 0.35);
         border-radius: 9999px;
         padding: 3px 10px;
         font-size: 0.78rem;
@@ -321,11 +348,11 @@ st.markdown("""
         margin-bottom: 6px;
     }
     .spend-bar-title {
-        color: #94a3b8;
+        color: #94A3B8;
         font-weight: 500;
     }
     .spend-bar-amount {
-        color: #ffffff;
+        color: #FFFFFF;
         font-weight: 700;
     }
     .progress-track {
@@ -339,24 +366,28 @@ st.markdown("""
         border-radius: 9999px;
     }
     .fill-green {
-        background: repeating-linear-gradient(45deg, #22c55e, #22c55e 6px, #16a34a 6px, #16a34a 12px);
-        box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+        background: repeating-linear-gradient(45deg, #10B981, #10B981 6px, #059669 6px, #059669 12px);
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.45);
     }
     .fill-cyan {
-        background: repeating-linear-gradient(45deg, #00d4ff, #00d4ff 6px, #0284c7 6px, #0284c7 12px);
-        box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+        background: repeating-linear-gradient(45deg, #00F2FE, #00F2FE 6px, #0284C7 6px, #0284C7 12px);
+        box-shadow: 0 0 12px rgba(0, 242, 254, 0.45);
     }
     .fill-pink {
-        background: repeating-linear-gradient(45deg, #ec4899, #ec4899 6px, #be185d 6px, #be185d 12px);
-        box-shadow: 0 0 10px rgba(236, 72, 153, 0.4);
+        background: repeating-linear-gradient(45deg, #8B5CF6, #8B5CF6 6px, #6D28D9 6px, #6D28D9 12px);
+        box-shadow: 0 0 12px rgba(139, 92, 246, 0.45);
     }
 
-    /* Equalizer Soundwave Subcards */
+    /* Soundwave Subcards */
     .submetric-card {
-        background: rgba(14, 20, 32, 0.75);
+        background: rgba(13, 18, 30, 0.85);
         border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 16px;
         padding: 12px 16px;
+        transition: all 0.2s ease;
+    }
+    .submetric-card:hover {
+        border-color: rgba(16, 185, 129, 0.25);
     }
     .submetric-head {
         display: flex;
@@ -367,7 +398,7 @@ st.markdown("""
     .submetric-title {
         font-size: 0.86rem;
         font-weight: 600;
-        color: #94a3b8;
+        color: #94A3B8;
     }
     .submetric-body {
         display: flex;
@@ -378,7 +409,7 @@ st.markdown("""
     .submetric-num {
         font-size: 1.85rem;
         font-weight: 800;
-        color: #ffffff;
+        color: #FFFFFF;
         letter-spacing: -0.5px;
     }
     .equalizer-bars {
@@ -393,46 +424,46 @@ st.markdown("""
         display: inline-block;
     }
     .cyan-bars span {
-        background: linear-gradient(180deg, #00d4ff 0%, #14b8a6 100%);
-        box-shadow: 0 0 6px rgba(0, 212, 255, 0.4);
+        background: linear-gradient(180deg, #00F2FE 0%, #10B981 100%);
+        box-shadow: 0 0 6px rgba(0, 242, 254, 0.4);
     }
     .blue-bars span {
-        background: linear-gradient(180deg, #38bdf8 0%, #3b82f6 100%);
-        box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
+        background: linear-gradient(180deg, #38BDF8 0%, #8B5CF6 100%);
+        box-shadow: 0 0 6px rgba(56, 189, 248, 0.4);
     }
     .submetric-delta-box {
         text-align: right;
     }
     .submetric-delta-lbl {
         font-size: 0.68rem;
-        color: #64748b;
+        color: #64748B;
     }
     .submetric-delta-val {
         font-size: 0.88rem;
         font-weight: 700;
-        color: #ffffff;
+        color: #FFFFFF;
     }
 
     /* Supply AI Insights Card */
     .ai-insight-card {
-        background: linear-gradient(145deg, rgba(32, 25, 18, 0.88) 0%, rgba(18, 24, 38, 0.85) 100%);
-        border: 1px solid rgba(251, 191, 36, 0.35);
+        background: linear-gradient(145deg, rgba(20, 28, 45, 0.9) 0%, rgba(13, 18, 30, 0.95) 100%);
+        border: 1px solid rgba(16, 185, 129, 0.35);
         border-radius: 20px;
-        padding: 16px 20px;
+        padding: 18px 22px;
         height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(251, 191, 36, 0.2);
+        box-shadow: 0 14px 40px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(16, 185, 129, 0.2);
     }
     .ai-insight-pill {
-        background: rgba(251, 191, 36, 0.12);
-        border: 1px solid rgba(251, 191, 36, 0.3);
+        background: rgba(16, 185, 129, 0.12);
+        border: 1px solid rgba(16, 185, 129, 0.35);
         border-radius: 9999px;
         padding: 4px 12px;
         font-size: 0.74rem;
         font-weight: 700;
-        color: #fbbf24;
+        color: #10B981;
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -440,15 +471,15 @@ st.markdown("""
     .ai-insight-big-stat {
         font-size: 3.5rem;
         font-weight: 800;
-        color: #ffffff;
+        color: #FFFFFF;
         letter-spacing: -1.5px;
         line-height: 1;
         margin: 12px 0 6px 0;
-        text-shadow: 0 0 24px rgba(251, 191, 36, 0.25);
+        text-shadow: 0 0 24px rgba(16, 185, 129, 0.3);
     }
     .ai-insight-text {
         font-size: 0.84rem;
-        color: #cbd5e1;
+        color: #CBD5E1;
         line-height: 1.4;
         margin-bottom: 14px;
     }
@@ -465,68 +496,171 @@ st.markdown("""
     }
     .carousel-bar.active {
         width: 32px;
-        background: #ffffff;
-        box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+        background: #10B981;
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    }
+
+    /* Structured KPI / Stat Metrics (Specification 3) */
+    div[data-testid="stMetric"] {
+        background: rgba(17, 23, 38, 0.75) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 18px !important;
+        padding: 20px !important;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+        backdrop-filter: blur(16px) !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    div[data-testid="stMetric"]:hover {
+        transform: translateY(-2px) !important;
+        border-color: rgba(16, 185, 129, 0.38) !important;
+        box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.8), 0 0 20px rgba(16, 185, 129, 0.14) !important;
+    }
+    div[data-testid="stMetric"]::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.6), transparent);
+        opacity: 0;
+        transition: opacity 0.25s ease;
+    }
+    div[data-testid="stMetric"]:hover::before {
+        opacity: 1;
+    }
+    div[data-testid="stMetricValue"] {
+        color: #FFFFFF !important;
+        font-size: 2.2rem !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.03em !important;
+        line-height: 1.15 !important;
+        text-shadow: 0 0 16px rgba(16, 185, 129, 0.15) !important;
+    }
+    div[data-testid="stMetricLabel"] {
+        color: #94A3B8 !important;
+        font-size: 0.78rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.08em !important;
+        margin-bottom: 6px !important;
+    }
+    div[data-testid="stMetricDelta"] {
+        font-size: 0.82rem !important;
+        font-weight: 700 !important;
+        margin-top: 6px !important;
+    }
+
+    /* Form & Input Controls (Specification 5) */
+    div[data-baseweb="select"] > div,
+    div[data-baseweb="input"] > div,
+    div[data-testid="stTextInput"] input,
+    div[data-testid="stDateInput"] input {
+        background-color: rgba(17, 23, 38, 0.85) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 12px !important;
+        color: #E2E8F0 !important;
+        font-size: 0.88rem !important;
+        transition: all 0.2s ease !important;
+    }
+    div[data-baseweb="select"] > div:hover,
+    div[data-testid="stTextInput"] input:hover,
+    div[data-testid="stDateInput"] input:hover {
+        border-color: rgba(16, 185, 129, 0.4) !important;
+    }
+    div[data-baseweb="select"] > div:focus-within,
+    div[data-testid="stTextInput"] input:focus,
+    div[data-testid="stDateInput"] input:focus {
+        border-color: #10B981 !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25) !important;
+    }
+    /* Select Popover Menu */
+    ul[data-baseweb="menu"] {
+        background: #111726 !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.8) !important;
+    }
+    li[data-baseweb="menu-item"] {
+        color: #CBD5E1 !important;
+        font-size: 0.86rem !important;
+        transition: background 0.15s ease !important;
+    }
+    li[data-baseweb="menu-item"]:hover {
+        background: rgba(16, 185, 129, 0.15) !important;
+        color: #FFFFFF !important;
+    }
+
+    /* File Uploader Dropzone */
+    div[data-testid="stFileUploader"] section {
+        background: rgba(17, 23, 38, 0.6) !important;
+        border: 1.5px dashed rgba(16, 185, 129, 0.4) !important;
+        border-radius: 18px !important;
+        padding: 28px !important;
+        transition: all 0.25s ease !important;
+    }
+    div[data-testid="stFileUploader"] section:hover {
+        border-color: #10B981 !important;
+        background: rgba(16, 185, 129, 0.05) !important;
+        box-shadow: 0 0 24px rgba(16, 185, 129, 0.15) !important;
+    }
+
+    /* Modern Data Tables (Specification 5) */
+    div[data-testid="stDataFrame"] > div {
+        border-radius: 16px !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background: rgba(17, 23, 38, 0.8) !important;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+        overflow: hidden !important;
     }
 
     /* Buttons & Interactive Controls */
     div.stButton > button {
-        background: linear-gradient(135deg, #00d4ff 0%, #0284c7 100%) !important;
-        color: #0b0f17 !important;
+        background: linear-gradient(135deg, #10B981 0%, #00F2FE 100%) !important;
+        color: #090D16 !important;
         border-radius: 12px !important;
         border: none !important;
         font-weight: 700 !important;
-        transition: all 0.25s ease !important;
-        padding: 0.5rem 1.2rem !important;
-        box-shadow: 0 4px 16px rgba(0, 212, 255, 0.3) !important;
+        font-size: 0.92rem !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        padding: 0.55rem 1.3rem !important;
+        box-shadow: 0 4px 18px rgba(16, 185, 129, 0.35) !important;
     }
     div.stButton > button:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(0, 212, 255, 0.5) !important;
-        background: linear-gradient(135deg, #38bdf8 0%, #0369a1 100%) !important;
+        box-shadow: 0 6px 24px rgba(16, 185, 129, 0.55) !important;
+        background: linear-gradient(135deg, #34D399 0%, #38BDF8 100%) !important;
     }
     div.stDownloadButton > button {
-        background: rgba(18, 24, 38, 0.8) !important;
-        color: #00d4ff !important;
+        background: rgba(17, 23, 38, 0.85) !important;
+        color: #10B981 !important;
         border-radius: 12px !important;
-        border: 1px solid rgba(0, 212, 255, 0.4) !important;
+        border: 1px solid rgba(16, 185, 129, 0.4) !important;
         font-weight: 600 !important;
+        font-size: 0.88rem !important;
         transition: all 0.25s ease !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
     }
     div.stDownloadButton > button:hover {
-        background: rgba(0, 212, 255, 0.12) !important;
+        background: rgba(16, 185, 129, 0.14) !important;
         transform: translateY(-2px) !important;
-        border-color: #00d4ff !important;
+        border-color: #10B981 !important;
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.25) !important;
     }
 
-    /* DataFrames / Tables */
-    div[data-testid="stDataFrame"] > div {
-        border-radius: 16px !important;
+    /* Alerts & Notifications */
+    div[data-testid="stAlert"] {
+        background: rgba(17, 23, 38, 0.85) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        background: rgba(14, 20, 32, 0.85) !important;
+        border-radius: 14px !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
     }
 
-    /* Standard Metrics */
-    div[data-testid="stMetricValue"] {
-        color: #00d4ff !important;
-        font-size: 2.1rem !important;
-        font-weight: 800 !important;
-    }
-    div[data-testid="stMetricLabel"] {
-        color: #94a3b8 !important;
-        font-size: 0.95rem !important;
-        font-weight: 600 !important;
-    }
-    div[data-testid="stMetricContainer"] {
-        background: rgba(18, 24, 38, 0.72) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 16px !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
-    }
-
-    /* Headers */
+    /* Headers & Typography */
     h1, h2, h3, h4, h5 {
-        color: #ffffff !important;
+        color: #FFFFFF !important;
         font-weight: 700 !important;
         letter-spacing: -0.4px !important;
     }
@@ -542,19 +676,20 @@ st.markdown("""
     <div class="zentra-topbar">
         <div class="zentra-brand">
             <div class="zentra-logo-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
                     <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#zlogo)" />
-                    <path d="M2 17L12 22L22 17" stroke="#00d4ff" stroke-width="2.2" stroke-linecap="round" />
-                    <path d="M2 12L12 17L22 12" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" />
+                    <path d="M2 17L12 22L22 17" stroke="#00F2FE" stroke-width="2.2" stroke-linecap="round" />
+                    <path d="M2 12L12 17L22 12" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" />
                     <defs>
                         <linearGradient id="zlogo" x1="2" y1="2" x2="22" y2="12">
-                            <stop stop-color="#f59e0b" />
-                            <stop offset="1" stop-color="#00d4ff" />
+                            <stop stop-color="#10B981" />
+                            <stop offset="1" stop-color="#00F2FE" />
                         </linearGradient>
                     </defs>
                 </svg>
             </div>
             <span class="zentra-brand-text">Supply Chain Analytics</span>
+            <span class="pro-badge">ENTERPRISE</span>
         </div>
         <div class="zentra-header-right">
             <div class="zentra-tool-btn" title="Search">
@@ -562,7 +697,7 @@ st.markdown("""
             </div>
             <div class="zentra-tool-btn notification-tool" title="Notifications">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                <span class="red-dot"></span>
+                <span class="green-dot"></span>
             </div>
             <div class="zentra-avatar-pill">
                 <div class="avatar-circle">SC</div>
@@ -626,10 +761,10 @@ def _download_buttons(df: pd.DataFrame | None, base_name: str, key_prefix: str =
                 )
 
 
-# Exact Zentra navigation list and order matching uploaded reference
+# Navigation list with all 10 tabs intact in exact required order
 PAGES = [
-    "Home",
     "Data Management",
+    "Dashboard",
     "Inventory Analysis",
     "Demand Analysis",
     "Demand Prediction",
@@ -644,42 +779,42 @@ page = option_menu(
     menu_title=None,
     options=PAGES,
     icons=[
-        "house", "database", "box", "graph-up", "graph-up-arrow", 
-        "truck", "currency-dollar", "sliders", "stars", "file-text"
+        "database-fill", "speedometer2", "box-seam-fill", "graph-up", "activity", 
+        "truck", "cash-coin", "sliders2", "stars", "file-earmark-text-fill"
     ],
     default_index=0,
     orientation="horizontal",
     styles={
         "container": {
-            "padding": "4px 10px !important",
-            "background-color": "rgba(18, 24, 38, 0.85)",
+            "padding": "6px 14px !important",
+            "background": "rgba(17, 23, 38, 0.78)",
             "border-radius": "9999px",
-            "margin-bottom": "18px",
+            "margin-bottom": "22px",
             "display": "flex",
             "flex-wrap": "wrap",
             "justify-content": "center",
-            "box-shadow": "0 8px 32px 0 rgba(0, 0, 0, 0.45)",
+            "box-shadow": "0 14px 40px -10px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.08)",
             "border": "1px solid rgba(255, 255, 255, 0.08)",
-            "backdrop-filter": "blur(12px)",
+            "backdrop-filter": "blur(20px)",
         },
-        "icon": {"color": "#00d4ff", "font-size": "13px"}, 
+        "icon": {"color": "#10B981", "font-size": "13px"}, 
         "nav-link": {
             "font-size": "12.5px",
             "font-weight": "500",
             "text-align": "center",
-            "margin": "2px 3px",
-            "color": "#94a3b8",
+            "margin": "3px 4px",
+            "color": "#94A3B8",
             "border-radius": "9999px",
-            "padding": "6px 12px",
+            "padding": "7px 14px",
             "--hover-color": "rgba(255, 255, 255, 0.06)",
-            "transition": "all 0.2s ease",
+            "transition": "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
         },
         "nav-link-selected": {
-            "background": "linear-gradient(180deg, rgba(20, 32, 50, 0.95) 0%, rgba(12, 20, 35, 0.95) 100%)",
-            "color": "#ffffff",
+            "background": "linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(0, 242, 254, 0.12) 100%)",
+            "color": "#FFFFFF",
             "font-weight": "700",
-            "border": "1px solid #00d4ff",
-            "box-shadow": "0 0 16px rgba(0, 212, 255, 0.45)",
+            "border": "1px solid rgba(16, 185, 129, 0.65)",
+            "box-shadow": "0 0 20px rgba(16, 185, 129, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
             "border-radius": "9999px",
         },
     }
@@ -757,11 +892,11 @@ elif page in ["Home", "Dashboard"]:
                     <h1 class="overview-title">Overview</h1>
                 </div>
             </div>
-            <div style="background: rgba(18, 24, 38, 0.72); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 20px; padding: 60px 24px; text-align: center; margin-top: 15px; box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.65);">
-                <div style="font-size: 3rem; margin-bottom: 14px;">📊</div>
-                <h2 style="font-size: 1.45rem; font-weight: 700; color: #ffffff; margin-bottom: 8px;">No Dataset Uploaded</h2>
-                <p style="font-size: 0.92rem; color: #94a3b8; max-width: 520px; margin: 0 auto; line-height: 1.6;">
-                    There is currently no information to display. Please upload your supply chain CSV dataset in <b>Data Management</b> to generate the overview analytics, payments & costs, inventory flow, and spend optimization.
+            <div style="background: rgba(17, 23, 38, 0.75); border: 1.5px dashed rgba(16, 185, 129, 0.35); border-radius: 20px; padding: 64px 28px; text-align: center; margin-top: 15px; box-shadow: 0 14px 40px -10px rgba(0, 0, 0, 0.7); backdrop-filter: blur(16px);">
+                <div style="font-size: 3.2rem; margin-bottom: 14px; filter: drop-shadow(0 0 14px rgba(16, 185, 129, 0.3));">📊</div>
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: #FFFFFF; margin-bottom: 8px; letter-spacing: -0.02em;">No Dataset Uploaded</h2>
+                <p style="font-size: 0.94rem; color: #94A3B8; max-width: 520px; margin: 0 auto; line-height: 1.6;">
+                    There is currently no information to display. Please upload your supply chain CSV dataset in <b style="color: #10B981;">Data Management</b> to generate overview analytics, stage costs, inventory flow, and spend optimization.
                 </p>
             </div>
         """, unsafe_allow_html=True)
@@ -1277,9 +1412,9 @@ elif page == "Reporting":
         
         def kpi_card(title, value):
             return f"""
-            <div style="border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 6px; padding: 12px 16px; background-color: transparent; margin-bottom: 10px;">
-                <p style="font-size: 13px; color: #555; margin: 0 0 4px 0;">{title}</p>
-                <p style="font-size: 24px; font-weight: bold; color: #111; margin: 0;">{value}</p>
+            <div style="background: rgba(17, 23, 38, 0.75); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 18px 22px; margin-bottom: 12px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px); transition: all 0.25s ease;">
+                <p style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin: 0 0 6px 0;">{title}</p>
+                <p style="font-size: 26px; font-weight: 800; color: #FFFFFF; margin: 0; letter-spacing: -0.03em; text-shadow: 0 0 16px rgba(16, 185, 129, 0.15);">{value}</p>
             </div>
             """
 

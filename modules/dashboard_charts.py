@@ -12,27 +12,29 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # -----------------------------------------------------------------------------
-# Color Palette Constants
+# Color Palette Constants (Ultra-modern Dark SaaS / Fintech Theme)
 # -----------------------------------------------------------------------------
-COLOR_PAGE_BG = "#0B2B2F"
-COLOR_CARD_BG = "#0E3237"
-COLOR_CARD_BORDER = "rgba(184, 163, 42, 0.6)"
-COLOR_GOLD = "#E6C32D"
-COLOR_GREEN = "#1FE08F"
-COLOR_BLUE = "#2E8BFF"
-COLOR_DEEP_BLUE = "#2536A8"
-COLOR_ORANGE = "#EE6C3C"
-COLOR_TEXT = "#F2F2F2"
-COLOR_MUTED = "#9FB4B6"
-COLOR_LIGHT_BLUE = "#A9D2FF"
+COLOR_PAGE_BG = "#090D16"
+COLOR_CARD_BG = "#111726"
+COLOR_CARD_BORDER = "rgba(255, 255, 255, 0.08)"
+COLOR_GOLD = "#E6C32D"        # Preserved gold hex
+COLOR_GREEN = "#10B981"       # Glowing Neon Mint / Emerald
+COLOR_BLUE = "#3B82F6"        # Sapphire Blue
+COLOR_DEEP_BLUE = "#8B5CF6"   # Royal Violet
+COLOR_ORANGE = "#EE6C3C"      # Preserved orange hex
+COLOR_AMBER = "#FBBF24"       # Luminous Amber
+COLOR_CYAN = "#00F2FE"        # Electric Cyan
+COLOR_TEXT = "#E2E8F0"        # Soft off-white
+COLOR_MUTED = "#94A3B8"       # Cool slate
+COLOR_LIGHT_BLUE = "#38BDF8"  # Electric Sky Blue
 
 STATUS_COLOR_MAP = {
-    "Priority Review": COLOR_ORANGE,
-    "Low Stock": COLOR_GOLD,
-    "Review Required": "#D4B12A",
-    "Sufficient": COLOR_GREEN,
-    "Overstock": COLOR_BLUE,
-    "Overstock Review": COLOR_BLUE,
+    "Priority Review": "#F43F5E",    # Coral
+    "Low Stock": "#FBBF24",          # Amber
+    "Review Required": "#FB923C",    # Warm Orange
+    "Sufficient": "#10B981",         # Emerald
+    "Overstock": "#3B82F6",          # Sapphire Blue
+    "Overstock Review": "#8B5CF6",   # Royal Violet
 }
 
 # -----------------------------------------------------------------------------
@@ -318,14 +320,20 @@ def format_compact(val: float | int | None, prefix: str = "", suffix: str = "") 
 
 
 def apply_dashboard_theme(fig: go.Figure, height: int = 300) -> go.Figure:
-    """Apply unified Power BI dark teal theme to a Plotly figure."""
+    """Apply ultra-modern dark SaaS / fintech theme (Linear/Vercel style) to a Plotly figure."""
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color=COLOR_TEXT, family="sans-serif", size=11),
+        font=dict(color=COLOR_TEXT, family="'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif", size=11),
         margin=dict(l=30, r=20, t=30, b=30),
         height=height,
-        hoverlabel=dict(bgcolor=COLOR_CARD_BG, font_color=COLOR_TEXT, font_size=11),
+        hoverlabel=dict(
+            bgcolor="#111726",
+            font_color="#FFFFFF",
+            font_size=11,
+            font_family="'Plus Jakarta Sans', -apple-system, sans-serif",
+            bordercolor="rgba(16, 185, 129, 0.4)",
+        ),
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -336,13 +344,13 @@ def apply_dashboard_theme(fig: go.Figure, height: int = 300) -> go.Figure:
         ),
     )
     fig.update_xaxes(
-        gridcolor="rgba(159, 180, 182, 0.15)",
-        zerolinecolor="rgba(159, 180, 182, 0.25)",
+        gridcolor="rgba(255, 255, 255, 0.04)",
+        zerolinecolor="rgba(255, 255, 255, 0.08)",
         tickfont=dict(color=COLOR_MUTED, size=10),
     )
     fig.update_yaxes(
-        gridcolor="rgba(159, 180, 182, 0.15)",
-        zerolinecolor="rgba(159, 180, 182, 0.25)",
+        gridcolor="rgba(255, 255, 255, 0.04)",
+        zerolinecolor="rgba(255, 255, 255, 0.08)",
         tickfont=dict(color=COLOR_MUTED, size=10),
     )
     return fig
@@ -462,7 +470,7 @@ def plot_c1_demand_by_category(df: pd.DataFrame) -> ChartResult:
         return ChartResult(False, None, "no demand recorded across categories")
 
     total_demand = cat_df["Quantity_Demanded"].sum()
-    palette = [COLOR_GOLD, COLOR_GREEN, COLOR_BLUE, COLOR_ORANGE, COLOR_DEEP_BLUE, "#D4B12A"]
+    palette = [COLOR_GREEN, COLOR_CYAN, COLOR_BLUE, COLOR_DEEP_BLUE, COLOR_AMBER, "#F43F5E"]
 
     fig = go.Figure(
         data=[
@@ -481,7 +489,7 @@ def plot_c1_demand_by_category(df: pd.DataFrame) -> ChartResult:
         text=f"Total<br><b>{format_compact(total_demand)}</b>",
         x=0.5,
         y=0.5,
-        font=dict(size=12, color=COLOR_GOLD),
+        font=dict(size=12, color=COLOR_GREEN, family="'Plus Jakarta Sans', sans-serif"),
         showarrow=False,
     )
     apply_dashboard_theme(fig, height=280)
@@ -516,7 +524,7 @@ def plot_c2_stock_status_mix(inv_df: pd.DataFrame) -> ChartResult:
         text=f"Items<br><b>{total_items}</b>",
         x=0.5,
         y=0.5,
-        font=dict(size=12, color=COLOR_GOLD),
+        font=dict(size=12, color=COLOR_CYAN, family="'Plus Jakarta Sans', sans-serif"),
         showarrow=False,
     )
     apply_dashboard_theme(fig, height=280)
@@ -558,7 +566,7 @@ def plot_c3_demand_by_quarter_month(df: pd.DataFrame) -> ChartResult:
                 y=demands,
                 text=text_labels,
                 textposition="outside",
-                marker_color=COLOR_GOLD,
+                marker=dict(color=COLOR_GREEN, cornerradius=6),
             )
         ]
     )
@@ -594,7 +602,7 @@ def plot_c4_top_items_demand(df: pd.DataFrame) -> ChartResult:
                 orientation="h",
                 text=text_labels,
                 textposition="outside",
-                marker_color=COLOR_GOLD,
+                marker=dict(color=COLOR_CYAN, cornerradius=8),
             )
         ]
     )
@@ -629,7 +637,7 @@ def plot_c5_inventory_value_by_category(snapshot_df: pd.DataFrame) -> ChartResul
                 orientation="h",
                 text=text_labels,
                 textposition="outside",
-                marker_color=COLOR_GREEN,
+                marker=dict(color=COLOR_GREEN, cornerradius=8),
             )
         ]
     )
@@ -665,7 +673,7 @@ def plot_c6_quantity_supplied_by_supplier(supplier_df: pd.DataFrame) -> ChartRes
                 orientation="h",
                 text=text_labels,
                 textposition="outside",
-                marker_color=COLOR_BLUE,
+                marker=dict(color=COLOR_BLUE, cornerradius=8),
             )
         ]
     )
@@ -825,7 +833,7 @@ def plot_c10_lead_time_by_supplier(supplier_df: pd.DataFrame) -> ChartResult:
                 orientation="h",
                 text=text_labels,
                 textposition="outside",
-                marker_color=COLOR_BLUE,
+                marker=dict(color=COLOR_CYAN, cornerradius=8),
             )
         ]
     )
@@ -864,7 +872,7 @@ def plot_c11_supplier_price_index(supplier_df: pd.DataFrame) -> ChartResult:
                 orientation="h",
                 text=text_labels,
                 textposition="outside",
-                marker_color=COLOR_GREEN,
+                marker=dict(color=COLOR_GREEN, cornerradius=8),
             )
         ]
     )
@@ -915,8 +923,8 @@ def plot_c12_purchase_vs_transportation_cost(supplier_df: pd.DataFrame) -> Chart
 
     fig = go.Figure(
         data=[
-            go.Bar(name="Purchase Cost", x=months, y=p_costs, marker_color=COLOR_GOLD),
-            go.Bar(name="Transportation Cost", x=months, y=t_costs, marker_color=COLOR_ORANGE),
+            go.Bar(name="Purchase Cost", x=months, y=p_costs, marker=dict(color=COLOR_GREEN, cornerradius=4)),
+            go.Bar(name="Transportation Cost", x=months, y=t_costs, marker=dict(color=COLOR_CYAN, cornerradius=4)),
         ]
     )
     apply_dashboard_theme(fig, height=290)
@@ -943,8 +951,8 @@ def plot_c13_stock_vs_reorder_point(inv_df: pd.DataFrame) -> ChartResult:
 
     fig = go.Figure(
         data=[
-            go.Bar(name="Current Stock", y=items, x=stocks, orientation="h", marker_color=COLOR_GREEN),
-            go.Bar(name="Reorder Point", y=items, x=rops, orientation="h", marker_color=COLOR_GOLD),
+            go.Bar(name="Current Stock", y=items, x=stocks, orientation="h", marker=dict(color=COLOR_GREEN, cornerradius=6)),
+            go.Bar(name="Reorder Point", y=items, x=rops, orientation="h", marker=dict(color=COLOR_AMBER, cornerradius=6)),
         ]
     )
     apply_dashboard_theme(fig, height=290)
@@ -1136,27 +1144,27 @@ def plot_zentra_payments_and_costs(df: pd.DataFrame | None = None) -> ChartResul
 
     fig = go.Figure()
 
-    # Colors and styles for each step
+    # Colors and styles for each step (Neon Emerald & Cyan glow)
     colors = [
-        "rgba(0, 212, 255, 0.22)",
-        "rgba(0, 180, 255, 0.28)",
-        "rgba(0, 212, 255, 0.85)",  # Highlighted active Logistics step
-        "rgba(0, 150, 255, 0.22)",
-        "rgba(0, 120, 240, 0.18)",
+        "rgba(16, 185, 129, 0.22)",
+        "rgba(0, 242, 254, 0.28)",
+        "rgba(16, 185, 129, 0.85)",  # Highlighted active Logistics step
+        "rgba(0, 242, 254, 0.22)",
+        "rgba(59, 130, 246, 0.18)",
     ]
     line_colors = [
-        "#00d4ff",
-        "#00d4ff",
+        "#10b981",
+        "#00f2fe",
         "#ffffff",  # Glowing white border for active
-        "#00d4ff",
-        "#00d4ff",
+        "#00f2fe",
+        "#10b981",
     ]
     patterns = [
-        dict(shape="/", fillmode="replace", fgcolor="#00d4ff", fgopacity=0.4),
-        dict(shape="/", fillmode="replace", fgcolor="#00d4ff", fgopacity=0.4),
+        dict(shape="/", fillmode="replace", fgcolor="#10b981", fgopacity=0.4),
+        dict(shape="/", fillmode="replace", fgcolor="#00f2fe", fgopacity=0.4),
         dict(shape=""),  # Solid glowing center
-        dict(shape="/", fillmode="replace", fgcolor="#00d4ff", fgopacity=0.4),
-        dict(shape="/", fillmode="replace", fgcolor="#00d4ff", fgopacity=0.4),
+        dict(shape="/", fillmode="replace", fgcolor="#00f2fe", fgopacity=0.4),
+        dict(shape="/", fillmode="replace", fgcolor="#10b981", fgopacity=0.4),
     ]
 
     for i in range(len(stages)):
@@ -1178,13 +1186,13 @@ def plot_zentra_payments_and_costs(df: pd.DataFrame | None = None) -> ChartResul
     fig.add_annotation(
         x="Logistics",
         y=base_vals[2] * 0.95,
-        text="<b>48.6k trans</b> | Efficiency: <span style='color:#00d4ff;'>89%</span> | Drop-off: <span style='color:#94a3b8;'>-11%</span>",
+        text="<b>48.6k trans</b> | Efficiency: <span style='color:#10b981;'>89%</span> | Drop-off: <span style='color:#94a3b8;'>-11%</span>",
         showarrow=False,
         bgcolor="rgba(11, 15, 23, 0.92)",
-        bordercolor="#00d4ff",
+        bordercolor="#10b981",
         borderwidth=1,
         borderpad=6,
-        font=dict(color="#ffffff", size=10, family="sans-serif"),
+        font=dict(color="#ffffff", size=10, family="'Plus Jakarta Sans', sans-serif"),
         align="center",
     )
 
@@ -1230,26 +1238,26 @@ def plot_zentra_inventory_flow(df: pd.DataFrame | None = None) -> ChartResult:
 
     fig = go.Figure()
 
-    # Stepped magenta line with subtle glow fill
+    # Stepped neon emerald line with subtle glow fill
     fig.add_trace(go.Scatter(
         x=months,
         y=y_vals,
         mode="lines",
-        line=dict(shape="hv", color="#ec4899", width=2.8),
+        line=dict(shape="hv", color="#10b981", width=2.8),
         fill="tozeroy",
-        fillcolor="rgba(236, 72, 153, 0.08)",
+        fillcolor="rgba(16, 185, 129, 0.08)",
         showlegend=False,
         hoverinfo="x+y",
     ))
 
-    # Glowing peak marker point
+    # Glowing peak marker point (Electric Cyan)
     peak_idx = 3  # Apr peak
     fig.add_trace(go.Scatter(
         x=[months[peak_idx]],
         y=[y_vals[peak_idx]],
         mode="markers",
         marker=dict(
-            color="#ec4899",
+            color="#00f2fe",
             size=9,
             line=dict(color="#ffffff", width=2),
         ),
@@ -1264,15 +1272,15 @@ def plot_zentra_inventory_flow(df: pd.DataFrame | None = None) -> ChartResult:
         text="Peak: <b>Wed</b>",
         showarrow=True,
         arrowhead=0,
-        arrowcolor="rgba(236, 72, 153, 0.5)",
+        arrowcolor="rgba(0, 242, 254, 0.5)",
         arrowwidth=1,
         arrowsize=1,
         standoff=4,
-        bgcolor="rgba(20, 24, 36, 0.9)",
-        bordercolor="rgba(236, 72, 153, 0.4)",
+        bgcolor="rgba(17, 23, 38, 0.95)",
+        bordercolor="rgba(0, 242, 254, 0.4)",
         borderwidth=1,
         borderpad=4,
-        font=dict(color="#f472b6", size=10, family="sans-serif"),
+        font=dict(color="#00f2fe", size=10, family="'Plus Jakarta Sans', sans-serif"),
     )
 
     fig.update_layout(
