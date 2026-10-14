@@ -35,7 +35,7 @@ st.markdown("""
         color: #E2E8F0 !important;
     }
     .block-container {
-        padding-top: 1.2rem !important;
+        padding-top: 4.2rem !important;
         padding-bottom: 2.5rem !important;
         max-width: 98% !important;
     }
@@ -500,17 +500,19 @@ st.markdown("""
         box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
     }
 
-    /* Structured KPI / Stat Metrics (Specification 3) */
+    /* Structured KPI / Stat Metrics (Specification 3 & Task 2) */
     div[data-testid="stMetric"] {
         background: rgba(17, 23, 38, 0.75) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 18px !important;
-        padding: 20px !important;
+        padding: 16px 18px !important;
         box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
         backdrop-filter: blur(16px) !important;
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
         position: relative !important;
-        overflow: hidden !important;
+        overflow: visible !important;
+        min-width: 0 !important;
+        width: 100% !important;
     }
     div[data-testid="stMetric"]:hover {
         transform: translateY(-2px) !important;
@@ -533,19 +535,29 @@ st.markdown("""
     }
     div[data-testid="stMetricValue"] {
         color: #FFFFFF !important;
-        font-size: 2.2rem !important;
+        font-size: clamp(1.2rem, 1.8vw, 1.95rem) !important;
         font-weight: 800 !important;
-        letter-spacing: -0.03em !important;
-        line-height: 1.15 !important;
+        letter-spacing: -0.02em !important;
+        line-height: 1.2 !important;
         text-shadow: 0 0 16px rgba(16, 185, 129, 0.15) !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        overflow: visible !important;
+    }
+    div[data-testid="stMetricValue"] > div {
+        overflow: visible !important;
+        text-overflow: unset !important;
+        white-space: normal !important;
     }
     div[data-testid="stMetricLabel"] {
         color: #94A3B8 !important;
-        font-size: 0.78rem !important;
+        font-size: 0.74rem !important;
         font-weight: 700 !important;
         text-transform: uppercase !important;
         letter-spacing: 0.08em !important;
         margin-bottom: 6px !important;
+        white-space: normal !important;
+        word-break: break-word !important;
     }
     div[data-testid="stMetricDelta"] {
         font-size: 0.82rem !important;
@@ -688,7 +700,7 @@ st.markdown("""
                     </defs>
                 </svg>
             </div>
-            <span class="zentra-brand-text">Supply Chain Analytics</span>
+            <span class="zentra-brand-text">Supply Chain Optimization</span>
             <span class="pro-badge">ENTERPRISE</span>
         </div>
         <div class="zentra-header-right">
@@ -1233,21 +1245,153 @@ elif page == "Demand Analysis":
     if df is None or df.empty:
         st.info("No data uploaded. Please upload a dataset in Data Management first.")
     else:
+        from modules.ui_charts import (
+            compute_demand_kpis,
+            plot_d1_demand_trend,
+            plot_d2_demand_by_month,
+            plot_d3_demand_by_weekday,
+            plot_d4_top_items_demand,
+            plot_d5_demand_by_category,
+            plot_d6_weekday_month_heatmap,
+            plot_d7_demand_distribution,
+            find_col,
+            format_compact,
+            format_full_value,
+        )
+
+        # Top KPI Cards
+        dem_kpis = compute_demand_kpis(df)
+        kpi_cols = st.columns(4)
+        for i, (k, (compact_v, full_v)) in enumerate(dem_kpis.items()):
+            kpi_cols[i].metric(k, compact_v, help=f"Exact Value: {full_v}")
+
         from modules.demand import analyze_demand
         res = analyze_demand(df.copy())
         if res.get("status") == "success":
             metrics = res.get("metrics", {})
             st.subheader("Demand Metrics")
             m1, m2, m3, m4 = st.columns(4)
-            m1.metric("Total Demand", f"{metrics.get('total', 0):,.2f}")
-            m2.metric("Average Demand", f"{metrics.get('average', 0):,.2f}")
+            tot_v = metrics.get('total', 0)
+            avg_v = metrics.get('average', 0)
+            var_v = metrics.get('variability', 0)
+            m1.metric("Total Demand", format_compact(tot_v), help=f"Exact Value: {format_full_value(tot_v)}")
+            m2.metric("Average Demand", format_compact(avg_v), help=f"Exact Value: {format_full_value(avg_v)}")
             m3.metric("Demand Trend", str(metrics.get("demand_trend", "N/A")).title())
-            m4.metric("Variability (Std)", f"{metrics.get('variability', 0):,.2f}")
+            m4.metric("Variability (Std)", format_compact(var_v), help=f"Exact Value: {format_full_value(var_v)}")
             
             with st.expander("View Raw Data"):
                 st.json(res)
         else:
             st.error(res.get("reason", "Unknown error"))
+
+        # Interactive Slicer Controls
+        c_cat = find_col(df, "Category", "category")
+        c_item = find_col(df, "Item_Name", "Item", "Item_ID", "Product")
+        c_date = find_col(df, "Date", "date")
+
+        filtered_df = df.copy()
+        if c_cat or c_item or c_date:
+            with st.expander("🔍 Filter Demand Analytics", expanded=False):
+                flt_cols = st.columns(3)
+                if c_date:
+                    dt_series = pd.to_datetime(df[c_date], errors="coerce").dropna()
+                    if not dt_series.empty:
+                        min_d, max_d = dt_series.min().date(), dt_series.max().date()
+                        sel_date = flt_cols[0].date_input(
+                            "Date Range", value=(min_d, max_d), min_value=min_d, max_value=max_d, key="dem_flt_date"
+                        )
+                        if isinstance(sel_date, (tuple, list)) and len(sel_date) == 2:
+                            filtered_df = filtered_df[
+                                (pd.to_datetime(filtered_df[c_date]).dt.date >= sel_date[0])
+                                & (pd.to_datetime(filtered_df[c_date]).dt.date <= sel_date[1])
+                            ]
+                if c_cat:
+                    cat_opts = ["All"] + sorted([str(c) for c in df[c_cat].dropna().unique()])
+                    sel_cat = flt_cols[1].selectbox("Category", cat_opts, index=0, key="dem_flt_cat")
+                    if sel_cat != "All":
+                        filtered_df = filtered_df[filtered_df[c_cat] == sel_cat]
+                if c_item:
+                    itm_pool = filtered_df if c_cat and sel_cat != "All" else df
+                    itm_opts = ["All"] + sorted([str(i) for i in itm_pool[c_item].dropna().unique()])
+                    sel_itm = flt_cols[2].selectbox("Item", itm_opts, index=0, key="dem_flt_itm")
+                    if sel_itm != "All":
+                        filtered_df = filtered_df[filtered_df[c_item] == sel_itm]
+
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+        st.subheader("Demand Visualizations & Patterns")
+
+        if filtered_df.empty:
+            st.info("No records match the selected filters. Please adjust the filters above.")
+        else:
+            # D1: Demand Trend over time
+            with st.container(border=True):
+                head_col1, head_col2 = st.columns([7, 3])
+                with head_col1:
+                    st.markdown("**Demand Trend Over Time (with 7-Day Moving Average)**")
+                with head_col2:
+                    freq_sel = st.radio("Frequency", ["Daily", "Weekly"], horizontal=True, key="dem_freq_toggle")
+                d1_res = plot_d1_demand_trend(filtered_df, freq=freq_sel)
+                if d1_res.available and d1_res.figure is not None:
+                    st.plotly_chart(d1_res.figure, use_container_width=True, key="chart_d1")
+                else:
+                    st.info(f"Not available — {d1_res.unavailable_reason}")
+
+            # Row 2: D2 (Monthly Demand) & D3 (Weekday Demand)
+            r2_col1, r2_col2 = st.columns(2)
+            with r2_col1:
+                with st.container(border=True):
+                    st.markdown("**Quantity Demanded by Month (Calendar Order)**")
+                    d2_res = plot_d2_demand_by_month(filtered_df)
+                    if d2_res.available and d2_res.figure is not None:
+                        st.plotly_chart(d2_res.figure, use_container_width=True, key="chart_d2")
+                    else:
+                        st.info(f"Not available — {d2_res.unavailable_reason}")
+            with r2_col2:
+                with st.container(border=True):
+                    st.markdown("**Average Demand by Weekday**")
+                    d3_res = plot_d3_demand_by_weekday(filtered_df)
+                    if d3_res.available and d3_res.figure is not None:
+                        st.plotly_chart(d3_res.figure, use_container_width=True, key="chart_d3")
+                    else:
+                        st.info(f"Not available — {d3_res.unavailable_reason}")
+
+            # Row 3: D4 (Top Items) & D5 (Demand by Category)
+            r3_col1, r3_col2 = st.columns(2)
+            with r3_col1:
+                with st.container(border=True):
+                    st.markdown("**Top Items by Quantity Demanded**")
+                    d4_res = plot_d4_top_items_demand(filtered_df, top_n=10)
+                    if d4_res.available and d4_res.figure is not None:
+                        st.plotly_chart(d4_res.figure, use_container_width=True, key="chart_d4")
+                    else:
+                        st.info(f"Not available — {d4_res.unavailable_reason}")
+            with r3_col2:
+                with st.container(border=True):
+                    st.markdown("**Quantity Demanded by Category**")
+                    d5_res = plot_d5_demand_by_category(filtered_df)
+                    if d5_res.available and d5_res.figure is not None:
+                        st.plotly_chart(d5_res.figure, use_container_width=True, key="chart_d5")
+                    else:
+                        st.info(f"Not available — {d5_res.unavailable_reason}")
+
+            # Row 4: D6 (Weekday x Month Heatmap) & D7 (Demand Distribution Histogram)
+            r4_col1, r4_col2 = st.columns(2)
+            with r4_col1:
+                with st.container(border=True):
+                    st.markdown("**Demand Intensity Heatmap (Weekday x Month)**")
+                    d6_res = plot_d6_weekday_month_heatmap(filtered_df)
+                    if d6_res.available and d6_res.figure is not None:
+                        st.plotly_chart(d6_res.figure, use_container_width=True, key="chart_d6")
+                    else:
+                        st.info(f"Not available — {d6_res.unavailable_reason}")
+            with r4_col2:
+                with st.container(border=True):
+                    st.markdown("**Daily Demand Distribution**")
+                    d7_res = plot_d7_demand_distribution(filtered_df)
+                    if d7_res.available and d7_res.figure is not None:
+                        st.plotly_chart(d7_res.figure, use_container_width=True, key="chart_d7")
+                    else:
+                        st.info(f"Not available — {d7_res.unavailable_reason}")
 
 # -------------------------------------------------------------
 # 5. Demand Prediction
@@ -1285,6 +1429,25 @@ elif page == "Supplier Analysis":
     if df is None or df.empty:
         st.info("No data uploaded. Please upload a dataset in Data Management first.")
     else:
+        from modules.ui_charts import (
+            compute_supplier_kpis,
+            plot_s1_lead_time_by_supplier,
+            plot_s2_supplier_price_index,
+            plot_s3_quantity_supplied_share,
+            plot_s4_transportation_cost_by_supplier,
+            plot_s5_delivery_time_distribution,
+            plot_s6_monthly_delivery_trend,
+            plot_s7_delivery_scatter,
+            format_compact,
+            format_full_value,
+        )
+
+        # Top KPI Cards
+        sup_kpis = compute_supplier_kpis(df)
+        kpi_cols = st.columns(4)
+        for i, (k, (compact_v, full_v)) in enumerate(sup_kpis.items()):
+            kpi_cols[i].metric(k, compact_v, help=f"Exact Value: {full_v}")
+
         from modules.supplier import analyze_supplier
         res = analyze_supplier(df.copy())
         if res.get("status") == "success":
@@ -1297,15 +1460,96 @@ elif page == "Supplier Analysis":
                     qty_s = stats.get('total_quantity_supplied')
                     avg_del = stats.get('average_delivery_time_days')
                     std_del = stats.get('supply_consistency_std')
-                    c1.metric("Total Qty Supplied", f"{qty_s:,.2f}" if qty_s is not None else "N/A")
-                    c2.metric("Avg Delivery (Days)", f"{avg_del:,.2f}" if avg_del is not None else "N/A")
-                    c3.metric("Consistency (Std)", f"{std_del:,.2f}" if std_del is not None else "N/A")
+                    c1.metric(
+                        "Total Qty Supplied",
+                        format_compact(qty_s) if qty_s is not None else "N/A",
+                        help=f"Exact Value: {format_full_value(qty_s)}" if qty_s is not None else None,
+                    )
+                    c2.metric(
+                        "Avg Delivery (Days)",
+                        f"{avg_del:.1f}d" if avg_del is not None else "N/A",
+                        help=f"Exact Value: {avg_del:.2f} days" if avg_del is not None else None,
+                    )
+                    c3.metric(
+                        "Consistency (Std)",
+                        f"{std_del:.2f}" if std_del is not None else "N/A",
+                        help=f"Exact Value: {std_del:.3f}" if std_del is not None else None,
+                    )
                     st.markdown("<br>", unsafe_allow_html=True)
-
             else:
                 st.info("No supplier metrics available.")
         else:
             st.error(res.get("reason", "Unknown error"))
+
+        # Interactive Supplier Analytics & Logistics Matrix (S1 - S7)
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+        st.subheader("Supplier Logistics & Performance Matrix")
+
+        # Row 1: S1 (Average Delivery Lead Time) & S2 (Supplier Price Index)
+        r1_col1, r1_col2 = st.columns(2)
+        with r1_col1:
+            with st.container(border=True):
+                st.markdown("**Average Delivery Lead Time (Days)**")
+                s1_res = plot_s1_lead_time_by_supplier(df)
+                if s1_res.available and s1_res.figure is not None:
+                    st.plotly_chart(s1_res.figure, use_container_width=True, key="chart_s1")
+                else:
+                    st.info(f"Not available — {s1_res.unavailable_reason}")
+        with r1_col2:
+            with st.container(border=True):
+                st.markdown("**Supplier Price Index vs Baseline**")
+                s2_res = plot_s2_supplier_price_index(df)
+                if s2_res.available and s2_res.figure is not None:
+                    st.plotly_chart(s2_res.figure, use_container_width=True, key="chart_s2")
+                else:
+                    st.info(f"Not available — {s2_res.unavailable_reason}")
+
+        # Row 2: S3 (Share of Quantity Supplied) & S4 (Transportation Cost by Supplier)
+        r2_col1, r2_col2 = st.columns(2)
+        with r2_col1:
+            with st.container(border=True):
+                st.markdown("**Share of Quantity Supplied by Supplier**")
+                s3_res = plot_s3_quantity_supplied_share(df)
+                if s3_res.available and s3_res.figure is not None:
+                    st.plotly_chart(s3_res.figure, use_container_width=True, key="chart_s3")
+                else:
+                    st.info(f"Not available — {s3_res.unavailable_reason}")
+        with r2_col2:
+            with st.container(border=True):
+                st.markdown("**Total Transportation Cost by Supplier**")
+                s4_res = plot_s4_transportation_cost_by_supplier(df)
+                if s4_res.available and s4_res.figure is not None:
+                    st.plotly_chart(s4_res.figure, use_container_width=True, key="chart_s4")
+                else:
+                    st.info(f"Not available — {s4_res.unavailable_reason}")
+
+        # Row 3: S5 (Lead Time Distribution Box Plot) & S6 (Monthly Deliveries & Quantity Received)
+        r3_col1, r3_col2 = st.columns(2)
+        with r3_col1:
+            with st.container(border=True):
+                st.markdown("**Delivery Lead Time Distribution (Variability)**")
+                s5_res = plot_s5_delivery_time_distribution(df)
+                if s5_res.available and s5_res.figure is not None:
+                    st.plotly_chart(s5_res.figure, use_container_width=True, key="chart_s5")
+                else:
+                    st.info(f"Not available — {s5_res.unavailable_reason}")
+        with r3_col2:
+            with st.container(border=True):
+                st.markdown("**Monthly Deliveries & Quantity Received Trend**")
+                s6_res = plot_s6_monthly_delivery_trend(df)
+                if s6_res.available and s6_res.figure is not None:
+                    st.plotly_chart(s6_res.figure, use_container_width=True, key="chart_s6")
+                else:
+                    st.info(f"Not available — {s6_res.unavailable_reason}")
+
+        # Row 4: S7 (Delivery Scatter Plot: Quantity Supplied vs Delivery Lead Time)
+        with st.container(border=True):
+            st.markdown("**Delivery Batch Size vs Delivery Lead Time**")
+            s7_res = plot_s7_delivery_scatter(df)
+            if s7_res.available and s7_res.figure is not None:
+                st.plotly_chart(s7_res.figure, use_container_width=True, key="chart_s7")
+            else:
+                st.info(f"Not available — {s7_res.unavailable_reason}")
 
 # -------------------------------------------------------------
 # 7. Cost Analysis
@@ -1323,10 +1567,13 @@ elif page == "Cost Analysis":
         if not cost_res.available:
             st.warning(cost_res.message)
         else:
+            from modules.ui_charts import format_compact, format_full_value
             st.subheader("Cost Summary")
             metric_cols = st.columns(len(cost_res.totals))
             for i, (k, v) in enumerate(cost_res.totals.items()):
-                metric_cols[i].metric(k, f"{v:,.2f}")
+                full_val = format_full_value(v)
+                compact_val = format_compact(v)
+                metric_cols[i].metric(k, compact_val, help=f"Exact Value: {full_val}")
 
             if cost_res.item_level is not None:
                 st.subheader("Item-Level Cost Breakdown")
