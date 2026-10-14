@@ -252,3 +252,29 @@ def test_format_compact():
     assert format_compact(1500) == "1.5K"
     assert format_compact(2500000) == "2.5M"
     assert format_compact(1200000000) == "1.2B"
+
+
+def test_standardize_dataframe_conflicting_aliases_and_duplicates():
+    """Test that conflicting aliases and duplicate column headers are deduplicated and numeric conversion works."""
+    raw = pd.DataFrame([[10.0, 12.0, "Widget", 50, 60]], columns=["Price", "Unit Price", "Item", "demand", "sales"])
+    clean = standardize_dataframe(raw)
+    assert not clean.columns.duplicated().any()
+    assert "Unit_Price" in clean.columns
+    assert "Quantity_Demanded" in clean.columns
+    assert isinstance(clean["Unit_Price"], pd.Series)
+    assert clean["Unit_Price"].iloc[0] == 10.0
+
+
+def test_standardize_dataframe_currency_and_commas():
+    """Test that formatted strings with currency symbols and commas are coerced properly."""
+    raw = pd.DataFrame({
+        "Item": ["Widget A", "Widget B"],
+        "Unit_Price": ["$25.00", "$1,200.50"],
+        "Current_Stock": ["100", "2,500"],
+    })
+    clean = standardize_dataframe(raw)
+    assert clean["Unit_Price"].iloc[0] == 25.0
+    assert clean["Unit_Price"].iloc[1] == 1200.50
+    assert clean["Current_Stock"].iloc[0] == 100.0
+    assert clean["Current_Stock"].iloc[1] == 2500.0
+

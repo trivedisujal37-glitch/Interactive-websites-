@@ -696,6 +696,8 @@ if page == "Data Management":
     if uploaded_file is not None:
         try:
             df = pd.read_csv(uploaded_file)
+            df.columns = [str(c).strip() for c in df.columns]
+            df = df.loc[:, ~df.columns.duplicated(keep="first")]
             if st.session_state.dataset_name != uploaded_file.name:
                 st.session_state.raw_df = df
                 st.session_state.dataset_name = uploaded_file.name
@@ -765,21 +767,31 @@ elif page in ["Home", "Dashboard"]:
         """, unsafe_allow_html=True)
     else:
         clean_df = standardize_dataframe(raw_df)
+        clean_df = clean_df.loc[:, ~clean_df.columns.duplicated(keep="first")]
+
+        if "Current_Stock" not in clean_df.columns:
+            clean_df["Current_Stock"] = 100.0
+
         if "Quantity_Demanded" not in clean_df.columns:
-            clean_df["Quantity_Demanded"] = clean_df["Current_Stock"] if "Current_Stock" in clean_df.columns else 10.0
+            clean_df["Quantity_Demanded"] = clean_df["Current_Stock"].fillna(10.0)
+
         if "Date" not in clean_df.columns or clean_df["Date"].isna().all():
             clean_df["Date"] = pd.date_range("2024-01-15", periods=len(clean_df), freq="D" if len(clean_df) > 30 else "30D")
+
         if "Supplier_ID" not in clean_df.columns:
             if "Category" in clean_df.columns and clean_df["Category"].notna().any():
-                clean_df["Supplier_ID"] = "SUP-" + clean_df["Category"].astype(str).str[:4].str.upper()
+                clean_df["Supplier_ID"] = "SUP-" + clean_df["Category"].fillna("GEN").astype(str).str[:4].str.upper()
             else:
                 clean_df["Supplier_ID"] = [f"SUP-{chr(65 + (i % 4))}" for i in range(len(clean_df))]
+
         if "Quantity_Supplied" not in clean_df.columns:
-            clean_df["Quantity_Supplied"] = clean_df["Current_Stock"] if "Current_Stock" in clean_df.columns else 100.0
+            clean_df["Quantity_Supplied"] = clean_df["Current_Stock"].fillna(100.0)
+
         if "Delivery_Time" not in clean_df.columns:
             default_leads = [3.5, 5.0, 2.0, 4.0, 6.0, 2.5, 7.0]
             clean_df["Delivery_Time"] = [default_leads[i % len(default_leads)] for i in range(len(clean_df))]
 
+        clean_df = clean_df.loc[:, ~clean_df.columns.duplicated(keep="first")]
         z_metrics = calc_zentra_metrics(clean_df)
 
         # Overview Subheader Row

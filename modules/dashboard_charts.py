@@ -108,16 +108,42 @@ def standardize_dataframe(df: pd.DataFrame | None) -> pd.DataFrame:
         return pd.DataFrame()
 
     clean_df = df.copy()
-    # Map lowercase stripped names to canonical names
-    rename_dict = {}
+
+    # Clean string column names & deduplicate initial raw columns
+    clean_df.columns = [str(c).strip() for c in clean_df.columns]
+    clean_df = clean_df.loc[:, ~clean_df.columns.duplicated(keep="first")]
+
+    # Track targets that already exist in clean_df (case-insensitive)
+    existing_canonical = {}
     for col in clean_df.columns:
-        norm = str(col).strip().lower()
+        norm = col.lower()
+        for target in set(CANONICAL_COL_MAP.values()):
+            if norm == target.lower():
+                existing_canonical[target] = col
+                break
+
+    rename_dict = {}
+    claimed_targets = set(existing_canonical.keys())
+
+    for col in clean_df.columns:
+        norm = col.lower()
+        # If column matches a canonical target by case-insensitivity, normalize casing
+        if col in existing_canonical.values():
+            for target, ex_col in existing_canonical.items():
+                if ex_col == col and col != target:
+                    rename_dict[col] = target
+            continue
+
         if norm in CANONICAL_COL_MAP:
             target = CANONICAL_COL_MAP[norm]
-            if target not in clean_df.columns or target == col:
+            if target not in claimed_targets:
                 rename_dict[col] = target
+                claimed_targets.add(target)
 
     clean_df.rename(columns=rename_dict, inplace=True)
+
+    # Strictly guarantee unique columns
+    clean_df = clean_df.loc[:, ~clean_df.columns.duplicated(keep="first")]
 
     # Reconcile Item_ID and Item_Name
     if "Item_Name" in clean_df.columns and "Item_ID" not in clean_df.columns:
@@ -127,9 +153,12 @@ def standardize_dataframe(df: pd.DataFrame | None) -> pd.DataFrame:
 
     # Parse Date if present
     if "Date" in clean_df.columns:
-        clean_df["Date"] = pd.to_datetime(clean_df["Date"], errors="coerce")
+        date_data = clean_df["Date"]
+        if isinstance(date_data, pd.DataFrame):
+            date_data = date_data.iloc[:, 0]
+        clean_df["Date"] = pd.to_datetime(date_data, errors="coerce")
 
-    # Coerce numeric columns
+    # Coerce numeric columns safely
     numeric_cols = [
         "Quantity_Demanded", "Current_Stock", "Unit_Price", "Delivery_Time",
         "Quantity_Supplied", "Supplier_Unit_Price", "Transportation_Cost",
@@ -137,12 +166,21 @@ def standardize_dataframe(df: pd.DataFrame | None) -> pd.DataFrame:
     ]
     for ncol in numeric_cols:
         if ncol in clean_df.columns:
-            clean_df[ncol] = pd.to_numeric(clean_df[ncol], errors="coerce")
+            series = clean_df[ncol]
+            if isinstance(series, pd.DataFrame):
+                series = series.iloc[:, 0]
+            if series.dtype == object or pd.api.types.is_string_dtype(series):
+                series = series.astype(str).str.replace("$", "", regex=False).str.replace(",", "", regex=False).str.strip()
+            clean_df[ncol] = pd.to_numeric(series, errors="coerce")
 
     # If Supplier_ID present, ensure string without NaN strings
     if "Supplier_ID" in clean_df.columns:
-        clean_df["Supplier_ID"] = clean_df["Supplier_ID"].fillna("").astype(str).str.strip()
+        sup_data = clean_df["Supplier_ID"]
+        if isinstance(sup_data, pd.DataFrame):
+            sup_data = sup_data.iloc[:, 0]
+        clean_df["Supplier_ID"] = sup_data.fillna("").astype(str).str.strip()
 
+    clean_df = clean_df.loc[:, ~clean_df.columns.duplicated(keep="first")]
     return clean_df
 
 
@@ -155,11 +193,13 @@ def get_latest_stock_snapshot(df: pd.DataFrame) -> pd.DataFrame:
 
     if "Date" in df.columns and df["Date"].notna().any():
         valid_date_df = df.dropna(subset=["Date"]).sort_values("Date")
-        snapshot = valid_date_df.groupby(id_col, as_index=False).last()
-        return snapshot
-    else:
-        # Snapshot dataset: take last occurrence per item
+        if not valid_date_df.empty and id_col in valid_date_df.columns:
+            return valid_date_df.groupby(id_col, as_index=False).last()
+
+    # Snapshot dataset: take last occurrence per item
+    if id_col in df.columns:
         return df.groupby(id_col, as_index=False).last()
+    return df
 
 
 def compute_inventory_metrics(snapshot_df: pd.DataFrame) -> pd.DataFrame:
@@ -1086,7 +1126,10 @@ def plot_zentra_payments_and_costs(df: pd.DataFrame | None = None) -> ChartResul
     # Calculate from data or default to calibrated reference values
     base_vals = [65.2, 54.8, 48.6, 38.3, 32.9]
     if df is not None and not df.empty and "Quantity_Demanded" in df.columns:
-        total_q = float(df["Quantity_Demanded"].sum())
+        q_series = df["Quantity_Demanded"]
+        if isinstance(q_series, pd.DataFrame):
+            q_series = q_series.iloc[:, 0]
+        total_q = float(pd.to_numeric(q_series, errors="coerce").fillna(0).sum())
         if total_q > 0:
             scale = total_q / 240.0
             base_vals = [round(v * scale, 1) for v in [65.2, 54.8, 48.6, 38.3, 32.9]]
@@ -1175,10 +1218,15 @@ def plot_zentra_inventory_flow(df: pd.DataFrame | None = None) -> ChartResult:
     y_vals = [24, 38, 30, 46, 26, 34]
     
     if df is not None and not df.empty and "Current_Stock" in df.columns:
-        stock_mean = float(df["Current_Stock"].mean())
-        if stock_mean > 0:
-            scale = stock_mean / 35.0
-            y_vals = [round(v * scale, 1) for v in y_vals]
+        cs_series = df["Current_Stock"]
+        if isinstance(cs_series, pd.DataFrame):
+            cs_series = cs_series.iloc[:, 0]
+        valid_stocks = pd.to_numeric(cs_series, errors="coerce").dropna()
+        if not valid_stocks.empty:
+            stock_mean = float(valid_stocks.mean())
+            if stock_mean > 0:
+                scale = stock_mean / 35.0
+                y_vals = [round(v * scale, 1) for v in y_vals]
 
     fig = go.Figure()
 
@@ -1264,14 +1312,25 @@ def calc_zentra_metrics(df: pd.DataFrame | None = None) -> dict[str, Any]:
         # Check purchase cost or calculate proportional metrics
         if "Purchase Cost" in df.columns or "Supplier_Unit_Price" in df.columns:
             p_col = "Purchase Cost" if "Purchase Cost" in df.columns else "Supplier_Unit_Price"
-            p_sum = float(pd.to_numeric(df[p_col], errors="coerce").fillna(0).sum())
+            p_series = df[p_col]
+            if isinstance(p_series, pd.DataFrame):
+                p_series = p_series.iloc[:, 0]
+            p_sum = float(pd.to_numeric(p_series, errors="coerce").fillna(0).sum())
             if p_sum > 0:
                 procurement = p_sum
                 gross_spend = procurement * 1.55
                 distribution = gross_spend * 0.25
                 operations = gross_spend * 0.10
         elif "Current_Stock" in df.columns and "Unit_Price" in df.columns:
-            stock_val = float((df["Current_Stock"].fillna(0) * df["Unit_Price"].fillna(0)).sum())
+            cs = df["Current_Stock"]
+            if isinstance(cs, pd.DataFrame):
+                cs = cs.iloc[:, 0]
+            up = df["Unit_Price"]
+            if isinstance(up, pd.DataFrame):
+                up = up.iloc[:, 0]
+            cs_num = pd.to_numeric(cs, errors="coerce").fillna(0)
+            up_num = pd.to_numeric(up, errors="coerce").fillna(0)
+            stock_val = float((cs_num * up_num).sum())
             if stock_val > 0:
                 gross_spend = stock_val
                 procurement = gross_spend * 0.65
@@ -1279,11 +1338,17 @@ def calc_zentra_metrics(df: pd.DataFrame | None = None) -> dict[str, Any]:
                 operations = gross_spend * 0.10
 
         if "Supplier_ID" in df.columns:
-            s_count = int(df["Supplier_ID"].dropna().nunique())
+            s_series = df["Supplier_ID"]
+            if isinstance(s_series, pd.DataFrame):
+                s_series = s_series.iloc[:, 0]
+            s_count = int(s_series.dropna().nunique())
             suppliers_active = s_count
 
         if "Quantity_Demanded" in df.columns:
-            total_dem = float(pd.to_numeric(df["Quantity_Demanded"], errors="coerce").fillna(0).sum())
+            d_series = df["Quantity_Demanded"]
+            if isinstance(d_series, pd.DataFrame):
+                d_series = d_series.iloc[:, 0]
+            total_dem = float(pd.to_numeric(d_series, errors="coerce").fillna(0).sum())
             transactions = int(total_dem) if total_dem > 0 else len(df) * 10
             scale = max(0.1, total_dem / 240.0)
             base_vals = [round(v * scale, 1) for v in [65.2, 54.8, 48.6, 38.3, 32.9]]
