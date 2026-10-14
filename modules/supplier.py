@@ -9,26 +9,28 @@ def analyze_supplier(df: pd.DataFrame) -> dict:
     if df is None or df.empty:
         return {"status": "error", "reason": "Supplier analysis unavailable because data is empty."}
         
-    if COL_SUPPLIER not in df.columns:
-        df[COL_SUPPLIER] = np.random.choice(['Supplier_X', 'Supplier_Y'], size=len(df))
+    sup_col = next((c for c in df.columns if 'supplier' in c.lower()), None)
+    if not sup_col:
+        return {"status": "error", "reason": "Supplier analysis unavailable because supplier information was not provided."}
+        
+    df = df.copy()
+    if sup_col != COL_SUPPLIER:
+        df[COL_SUPPLIER] = df[sup_col]
 
     if COL_QUANTITY_SUPPLIED not in df.columns:
         qty_col = next((c for c in df.columns if 'qty' in c.lower() or 'quantity' in c.lower() or 'stock' in c.lower()), None)
         if qty_col:
             df[COL_QUANTITY_SUPPLIED] = df[qty_col]
-        else:
-            df[COL_QUANTITY_SUPPLIED] = np.random.randint(10, 500, size=len(df))
             
     if COL_DELIVERY_TIME not in df.columns:
-        del_col = next((c for c in df.columns if 'lead' in c.lower() or 'delivery' in c.lower() or 'time' in c.lower()), None)
+        del_col = next((c for c in df.columns if 'delivery' in c.lower() or 'lead' in c.lower()), None)
         if del_col:
             df[COL_DELIVERY_TIME] = df[del_col]
-        else:
-            df[COL_DELIVERY_TIME] = np.random.uniform(2.0, 14.0, size=len(df))
 
     df = df.dropna(subset=[COL_SUPPLIER]).copy()
     if df.empty:
         return {"status": "error", "reason": "Supplier analysis unavailable because supplier information was not provided."}
+
 
     supplier_stats = {}
     grouped = df.groupby(COL_SUPPLIER)

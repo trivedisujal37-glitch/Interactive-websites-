@@ -16,7 +16,7 @@ from utils.export import (
     get_available_export_formats,
 )
 
-st.set_page_config(page_title="Zentra — Supply Chain Optimization System", layout="wide", page_icon="⚡")
+st.set_page_config(page_title="Supply Chain Optimization System", layout="wide", page_icon="⚡")
 
 st.markdown("""
     <style>
@@ -554,7 +554,7 @@ st.markdown("""
                     </defs>
                 </svg>
             </div>
-            <span class="zentra-brand-text">zentra</span>
+            <span class="zentra-brand-text">Supply Chain Analytics</span>
         </div>
         <div class="zentra-header-right">
             <div class="zentra-tool-btn" title="Search">
@@ -747,16 +747,24 @@ elif page in ["Home", "Dashboard"]:
         ChartResult,
     )
 
-    # Resolve active dataframe (uploaded or default sample_data.csv)
     raw_df = st.session_state.raw_df
     if raw_df is None or raw_df.empty:
-        if os.path.exists("data/supply_chain_sample_data.csv"):
-            raw_df = pd.read_csv("data/supply_chain_sample_data.csv")
-        elif os.path.exists("sample_data.csv"):
-            raw_df = pd.read_csv("sample_data.csv")
-
-    clean_df = standardize_dataframe(raw_df) if raw_df is not None and not raw_df.empty else pd.DataFrame()
-    if not clean_df.empty:
+        st.markdown("""
+            <div class="zentra-overview-head">
+                <div class="overview-title-wrap">
+                    <h1 class="overview-title">Overview</h1>
+                </div>
+            </div>
+            <div style="background: rgba(18, 24, 38, 0.72); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 20px; padding: 60px 24px; text-align: center; margin-top: 15px; box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.65);">
+                <div style="font-size: 3rem; margin-bottom: 14px;">📊</div>
+                <h2 style="font-size: 1.45rem; font-weight: 700; color: #ffffff; margin-bottom: 8px;">No Dataset Uploaded</h2>
+                <p style="font-size: 0.92rem; color: #94a3b8; max-width: 520px; margin: 0 auto; line-height: 1.6;">
+                    There is currently no information to display. Please upload your supply chain CSV dataset in <b>Data Management</b> to generate the overview analytics, payments & costs, inventory flow, and spend optimization.
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
+    else:
+        clean_df = standardize_dataframe(raw_df)
         if "Quantity_Demanded" not in clean_df.columns:
             clean_df["Quantity_Demanded"] = clean_df["Current_Stock"] if "Current_Stock" in clean_df.columns else 10.0
         if "Date" not in clean_df.columns or clean_df["Date"].isna().all():
@@ -772,216 +780,210 @@ elif page in ["Home", "Dashboard"]:
             default_leads = [3.5, 5.0, 2.0, 4.0, 6.0, 2.5, 7.0]
             clean_df["Delivery_Time"] = [default_leads[i % len(default_leads)] for i in range(len(clean_df))]
 
-    z_metrics = calc_zentra_metrics(clean_df)
+        z_metrics = calc_zentra_metrics(clean_df)
 
-    # Overview Subheader Row matching Zentra
-    st.markdown("""
-        <div class="zentra-overview-head">
-            <div class="overview-title-wrap">
-                <h1 class="overview-title">Overview</h1>
-                <div class="overview-link-icon" title="View Reference Link">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        # Overview Subheader Row
+        st.markdown("""
+            <div class="zentra-overview-head">
+                <div class="overview-title-wrap">
+                    <h1 class="overview-title">Overview</h1>
+                </div>
+                <div class="overview-ctrls-wrap">
+                    <div class="ctrl-pill-btn"><span>◫ Compare</span> <span style="font-size: 9px; margin-left: 2px;">▼</span></div>
+                    <div class="ctrl-pill-btn date-range-pill">Jan 01 — July 31 <span class="vs-badge">vs</span> Aug 01 — Dec 31</div>
+                    <div class="ctrl-pill-btn add-widget-btn">Add widget +</div>
                 </div>
             </div>
-            <div class="overview-ctrls-wrap">
-                <div class="ctrl-pill-btn"><span>◫ Compare</span> <span style="font-size: 9px; margin-left: 2px;">▼</span></div>
-                <div class="ctrl-pill-btn date-range-pill">Jan 01 — July 31 <span class="vs-badge">vs</span> Aug 01 — Dec 31</div>
-                <div class="ctrl-pill-btn add-widget-btn">Add widget +</div>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-    # -------------------------------------------------------------
-    # ROW 1: Supply Chain Payments & Costs (Left) + Gross Spend (Right)
-    # -------------------------------------------------------------
-    r1_col_left, r1_col_right = st.columns([6.2, 3.8])
+        # -------------------------------------------------------------
+        # ROW 1: Supply Chain Payments & Costs (Left) + Gross Spend (Right)
+        # -------------------------------------------------------------
+        r1_col_left, r1_col_right = st.columns([6.2, 3.8])
 
-    # Left Card: Supply Chain Payments & Costs
-    with r1_col_left:
-        with st.container(border=True):
-            st.markdown("""
-                <div class="card-head-row">
-                    <div class="card-main-title">Supply Chain Payments & Costs</div>
-                    <div class="card-dots-btn">•••</div>
-                </div>
-                <div class="stages-metrics-row">
-                    <div class="stage-col">
-                        <div class="stage-label">Supplier Procure</div>
-                        <div class="stage-val">65.2k</div>
+        # Left Card: Supply Chain Payments & Costs
+        with r1_col_left:
+            with st.container(border=True):
+                st.markdown(f"""
+                    <div class="card-head-row">
+                        <div class="card-main-title">Supply Chain Payments & Costs</div>
+                        <div class="card-dots-btn">•••</div>
                     </div>
-                    <div class="stage-col">
-                        <div class="stage-label">Inventory</div>
-                        <div class="stage-val">54.8k</div>
-                    </div>
-                    <div class="stage-col active-stage">
-                        <div class="stage-label">Logistics</div>
-                        <div class="stage-val">48.6k</div>
-                    </div>
-                    <div class="stage-col">
-                        <div class="stage-label">Warehousing</div>
-                        <div class="stage-val">38.3k</div>
-                    </div>
-                    <div class="stage-col">
-                        <div class="stage-label">Finished</div>
-                        <div class="stage-val">32.9k</div>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
-
-            pay_chart_res = plot_zentra_payments_and_costs(clean_df)
-            if pay_chart_res.available and pay_chart_res.figure is not None:
-                st.plotly_chart(pay_chart_res.figure, use_container_width=True, config={"displayModeBar": False}, key="zentra_pay_chart")
-
-            st.markdown("""
-                <div class="ai-explore-wrap">
-                    <div class="ai-explore-label">✨ What would you like to explore next?</div>
-                    <div class="ai-explore-input-pill">
-                        <span>I want to know what caused the bottleneck in Logistics and how to optimize...</span>
-                        <span class="ai-explore-chevron">⌃</span>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
-
-    # Right Card: Gross Spend & Optimization
-    with r1_col_right:
-        with st.container(border=True):
-            st.markdown(f"""
-                <div class="card-head-row">
-                    <div class="card-main-title">Gross Spend & Optimization</div>
-                    <div class="card-dots-btn">•••</div>
-                </div>
-                <div class="gross-spend-label">Gross Spend</div>
-                <div class="gross-spend-metric-row">
-                    <span class="gross-spend-num">{z_metrics['gross_spend_str']}</span>
-                    <span class="gross-spend-delta">{z_metrics['gross_spend_delta']}</span>
-                </div>
-                <div class="spend-bar-row">
-                    <div class="spend-bar-head">
-                        <span class="spend-bar-title">Procurement</span>
-                        <span class="spend-bar-amount">{z_metrics['procurement_str']}</span>
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill fill-green" style="width: {z_metrics['procurement_pct']}%;"></div>
-                    </div>
-                </div>
-                <div class="spend-bar-row">
-                    <div class="spend-bar-head">
-                        <span class="spend-bar-title">Distribution</span>
-                        <span class="spend-bar-amount">{z_metrics['distribution_str']}</span>
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill fill-cyan" style="width: {z_metrics['distribution_pct']}%;"></div>
-                    </div>
-                </div>
-                <div class="spend-bar-row" style="margin-bottom: 24px;">
-                    <div class="spend-bar-head">
-                        <span class="spend-bar-title">Operations</span>
-                        <span class="spend-bar-amount">{z_metrics['operations_str']}</span>
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill fill-pink" style="width: {z_metrics['operations_pct']}%;"></div>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
-
-    # -------------------------------------------------------------
-    # ROW 2: Inventory Flow (Left) + Equalizers (Center) + AI Insights (Right)
-    # -------------------------------------------------------------
-    r2_col1, r2_col2, r2_col3 = st.columns([3.2, 3.6, 3.2])
-
-    # Left: Inventory Flow Chart
-    with r2_col1:
-        with st.container(border=True):
-            st.markdown("""
-                <div class="card-head-row">
-                    <div class="card-main-title">Inventory Flow</div>
-                    <div class="card-dots-btn">•••</div>
-                </div>
-            """, unsafe_allow_html=True)
-            flow_chart_res = plot_zentra_inventory_flow(clean_df)
-            if flow_chart_res.available and flow_chart_res.figure is not None:
-                st.plotly_chart(flow_chart_res.figure, use_container_width=True, config={"displayModeBar": False}, key="zentra_flow_chart")
-
-    # Center: Transactions & Suppliers Active
-    with r2_col2:
-        with st.container(border=True):
-            st.markdown(f"""
-                <div class="submetric-card">
-                    <div class="submetric-head">
-                        <span class="submetric-title">Transactions</span>
-                        <span class="card-dots-btn">•••</span>
-                    </div>
-                    <div class="submetric-body">
-                        <div class="submetric-left">
-                            <div class="submetric-num">{z_metrics['transactions_str']}</div>
+                    <div class="stages-metrics-row">
+                        <div class="stage-col">
+                            <div class="stage-label">Supplier Procure</div>
+                            <div class="stage-val">{z_metrics['stage_s1']}</div>
                         </div>
-                        <div class="equalizer-bars cyan-bars">
-                            <span style="height: 10px;"></span><span style="height: 18px;"></span>
-                            <span style="height: 28px;"></span><span style="height: 38px;"></span>
-                            <span style="height: 48px;"></span><span style="height: 32px;"></span>
-                            <span style="height: 44px;"></span><span style="height: 26px;"></span>
-                            <span style="height: 38px;"></span><span style="height: 18px;"></span>
-                            <span style="height: 30px;"></span><span style="height: 12px;"></span>
+                        <div class="stage-col">
+                            <div class="stage-label">Inventory</div>
+                            <div class="stage-val">{z_metrics['stage_s2']}</div>
                         </div>
-                        <div class="submetric-delta-box">
-                            <div class="submetric-delta-lbl">vs last period</div>
-                            <div class="submetric-delta-val">{z_metrics['transactions_delta']}</div>
+                        <div class="stage-col active-stage">
+                            <div class="stage-label">Logistics</div>
+                            <div class="stage-val">{z_metrics['stage_s3']}</div>
+                        </div>
+                        <div class="stage-col">
+                            <div class="stage-label">Warehousing</div>
+                            <div class="stage-val">{z_metrics['stage_s4']}</div>
+                        </div>
+                        <div class="stage-col">
+                            <div class="stage-label">Finished</div>
+                            <div class="stage-val">{z_metrics['stage_s5']}</div>
                         </div>
                     </div>
-                </div>
-                <div class="submetric-card" style="margin-top: 10px;">
-                    <div class="submetric-head">
-                        <span class="submetric-title">Suppliers Active</span>
-                        <span class="card-dots-btn">•••</span>
-                    </div>
-                    <div class="submetric-body">
-                        <div class="submetric-left">
-                            <div class="submetric-num">{z_metrics['suppliers_active_str']}</div>
-                        </div>
-                        <div class="equalizer-bars blue-bars">
-                            <span style="height: 12px;"></span><span style="height: 22px;"></span>
-                            <span style="height: 34px;"></span><span style="height: 46px;"></span>
-                            <span style="height: 32px;"></span><span style="height: 40px;"></span>
-                            <span style="height: 24px;"></span><span style="height: 16px;"></span>
-                            <span style="height: 28px;"></span><span style="height: 14px;"></span>
-                        </div>
-                        <div class="submetric-delta-box">
-                            <div class="submetric-delta-lbl">vs last period</div>
-                            <div class="submetric-delta-val">{z_metrics['suppliers_active_delta']}</div>
-                        </div>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
 
-    # Right: Supply AI Insights Card
-    with r2_col3:
-        with st.container(border=True):
-            st.markdown(f"""
-                <div class="ai-insight-card">
-                    <div>
-                        <span class="ai-insight-pill">💡 Supply AI insights</span>
-                        <div class="ai-insight-big-stat">{z_metrics['accuracy_str']}</div>
-                        <div class="ai-insight-text">
-                            Supply accuracy increased by <b>4%</b> compared to last week.
+                pay_chart_res = plot_zentra_payments_and_costs(clean_df)
+                if pay_chart_res.available and pay_chart_res.figure is not None:
+                    st.plotly_chart(pay_chart_res.figure, use_container_width=True, config={"displayModeBar": False}, key="zentra_pay_chart")
+
+                st.markdown("""
+                    <div class="ai-explore-wrap">
+                        <div class="ai-explore-label">✨ What would you like to explore next?</div>
+                        <div class="ai-explore-input-pill">
+                            <span>I want to know what caused the bottleneck in Logistics and how to optimize...</span>
+                            <span class="ai-explore-chevron">⌃</span>
                         </div>
                     </div>
-                    <div class="ai-carousel-pills">
-                        <span class="carousel-bar active"></span>
-                        <span class="carousel-bar"></span>
-                        <span class="carousel-bar"></span>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
 
-    # -------------------------------------------------------------
-    # EXPANDABLE MULTI-CHART ANALYTICS & SLICERS
-    # Preserves full analytical depth, filters, and all calculations
-    # -------------------------------------------------------------
-    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-    with st.expander("📊 Slicers & Comprehensive Multi-Chart Analytical Matrix", expanded=False):
-        if clean_df.empty:
-            st.info("Upload a dataset in 'Data Management' to view customized sliced data.")
-        else:
+        # Right Card: Gross Spend & Optimization
+        with r1_col_right:
+            with st.container(border=True):
+                st.markdown(f"""
+                    <div class="card-head-row">
+                        <div class="card-main-title">Gross Spend & Optimization</div>
+                        <div class="card-dots-btn">•••</div>
+                    </div>
+                    <div class="gross-spend-label">Gross Spend</div>
+                    <div class="gross-spend-metric-row">
+                        <span class="gross-spend-num">{z_metrics['gross_spend_str']}</span>
+                        <span class="gross-spend-delta">{z_metrics['gross_spend_delta']}</span>
+                    </div>
+                    <div class="spend-bar-row">
+                        <div class="spend-bar-head">
+                            <span class="spend-bar-title">Procurement</span>
+                            <span class="spend-bar-amount">{z_metrics['procurement_str']}</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill fill-green" style="width: {z_metrics['procurement_pct']}%;"></div>
+                        </div>
+                    </div>
+                    <div class="spend-bar-row">
+                        <div class="spend-bar-head">
+                            <span class="spend-bar-title">Distribution</span>
+                            <span class="spend-bar-amount">{z_metrics['distribution_str']}</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill fill-cyan" style="width: {z_metrics['distribution_pct']}%;"></div>
+                        </div>
+                    </div>
+                    <div class="spend-bar-row" style="margin-bottom: 24px;">
+                        <div class="spend-bar-head">
+                            <span class="spend-bar-title">Operations</span>
+                            <span class="spend-bar-amount">{z_metrics['operations_str']}</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill fill-pink" style="width: {z_metrics['operations_pct']}%;"></div>
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
+
+        # -------------------------------------------------------------
+        # ROW 2: Inventory Flow (Left) + Equalizers (Center) + AI Insights (Right)
+        # -------------------------------------------------------------
+        r2_col1, r2_col2, r2_col3 = st.columns([3.2, 3.6, 3.2])
+
+        # Left: Inventory Flow Chart
+        with r2_col1:
+            with st.container(border=True):
+                st.markdown("""
+                    <div class="card-head-row">
+                        <div class="card-main-title">Inventory Flow</div>
+                        <div class="card-dots-btn">•••</div>
+                    </div>
+                """, unsafe_allow_html=True)
+                flow_chart_res = plot_zentra_inventory_flow(clean_df)
+                if flow_chart_res.available and flow_chart_res.figure is not None:
+                    st.plotly_chart(flow_chart_res.figure, use_container_width=True, config={"displayModeBar": False}, key="zentra_flow_chart")
+
+        # Center: Transactions & Suppliers Active
+        with r2_col2:
+            with st.container(border=True):
+                st.markdown(f"""
+                    <div class="submetric-card">
+                        <div class="submetric-head">
+                            <span class="submetric-title">Transactions</span>
+                            <span class="card-dots-btn">•••</span>
+                        </div>
+                        <div class="submetric-body">
+                            <div class="submetric-left">
+                                <div class="submetric-num">{z_metrics['transactions_str']}</div>
+                            </div>
+                            <div class="equalizer-bars cyan-bars">
+                                <span style="height: 10px;"></span><span style="height: 18px;"></span>
+                                <span style="height: 28px;"></span><span style="height: 38px;"></span>
+                                <span style="height: 48px;"></span><span style="height: 32px;"></span>
+                                <span style="height: 44px;"></span><span style="height: 26px;"></span>
+                                <span style="height: 38px;"></span><span style="height: 18px;"></span>
+                                <span style="height: 30px;"></span><span style="height: 12px;"></span>
+                            </div>
+                            <div class="submetric-delta-box">
+                                <div class="submetric-delta-lbl">vs last period</div>
+                                <div class="submetric-delta-val">{z_metrics['transactions_delta']}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="submetric-card" style="margin-top: 10px;">
+                        <div class="submetric-head">
+                            <span class="submetric-title">Suppliers Active</span>
+                            <span class="card-dots-btn">•••</span>
+                        </div>
+                        <div class="submetric-body">
+                            <div class="submetric-left">
+                                <div class="submetric-num">{z_metrics['suppliers_active_str']}</div>
+                            </div>
+                            <div class="equalizer-bars blue-bars">
+                                <span style="height: 12px;"></span><span style="height: 22px;"></span>
+                                <span style="height: 34px;"></span><span style="height: 46px;"></span>
+                                <span style="height: 32px;"></span><span style="height: 40px;"></span>
+                                <span style="height: 24px;"></span><span style="height: 16px;"></span>
+                                <span style="height: 28px;"></span><span style="height: 14px;"></span>
+                            </div>
+                            <div class="submetric-delta-box">
+                                <div class="submetric-delta-lbl">vs last period</div>
+                                <div class="submetric-delta-val">{z_metrics['suppliers_active_delta']}</div>
+                            </div>
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
+
+        # Right: Supply AI Insights Card
+        with r2_col3:
+            with st.container(border=True):
+                st.markdown(f"""
+                    <div class="ai-insight-card">
+                        <div>
+                            <span class="ai-insight-pill">💡 Supply AI insights</span>
+                            <div class="ai-insight-big-stat">{z_metrics['accuracy_str']}</div>
+                            <div class="ai-insight-text">
+                                Supply accuracy increased by <b>4%</b> compared to last week.
+                            </div>
+                        </div>
+                        <div class="ai-carousel-pills">
+                            <span class="carousel-bar active"></span>
+                            <span class="carousel-bar"></span>
+                            <span class="carousel-bar"></span>
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
+
+        # -------------------------------------------------------------
+        # EXPANDABLE MULTI-CHART ANALYTICS & SLICERS
+        # Preserves full analytical depth, filters, and all calculations
+        # -------------------------------------------------------------
+        st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+        with st.expander("📊 Slicers & Comprehensive Multi-Chart Analytical Matrix", expanded=False):
             # Slicer row
             r0_date, r0_cat, r0_item, r0_sup = st.columns(4)
             with r0_date:
@@ -1052,6 +1054,7 @@ elif page in ["Home", "Dashboard"]:
                     c4_res = plot_c4_top_items_demand(global_df)
                     if c4_res.available and c4_res.figure is not None:
                         st.plotly_chart(c4_res.figure, use_container_width=True, key="mat_c4")
+
 
 
 
@@ -1143,10 +1146,14 @@ elif page == "Supplier Analysis":
                 for supplier, stats in metrics.items():
                     st.markdown(f"##### Supplier: {supplier}")
                     c1, c2, c3 = st.columns(3)
-                    c1.metric("Total Qty Supplied", f"{stats.get('total_quantity_supplied') or 0:,.2f}")
-                    c2.metric("Avg Delivery (Days)", f"{stats.get('average_delivery_time_days') or 0:,.2f}")
-                    c3.metric("Consistency (Std)", f"{stats.get('supply_consistency_std') or 0:,.2f}")
+                    qty_s = stats.get('total_quantity_supplied')
+                    avg_del = stats.get('average_delivery_time_days')
+                    std_del = stats.get('supply_consistency_std')
+                    c1.metric("Total Qty Supplied", f"{qty_s:,.2f}" if qty_s is not None else "N/A")
+                    c2.metric("Avg Delivery (Days)", f"{avg_del:,.2f}" if avg_del is not None else "N/A")
+                    c3.metric("Consistency (Std)", f"{std_del:,.2f}" if std_del is not None else "N/A")
                     st.markdown("<br>", unsafe_allow_html=True)
+
             else:
                 st.info("No supplier metrics available.")
         else:

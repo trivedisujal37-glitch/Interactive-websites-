@@ -24,8 +24,9 @@ def run_prediction(df: pd.DataFrame, future_periods: int = 7) -> dict:
     df = df.sort_values(COL_DATE).reset_index(drop=True)
     
     total_obs = len(df)
-    if total_obs < 3:
-        return {"status": "Prediction unavailable", "reason": f"Insufficient observations: {total_obs}. Minimum 3 required."}
+    if total_obs < 14:
+        return {"status": "Prediction unavailable", "reason": f"Insufficient observations: {total_obs}. Minimum 14 required."}
+
 
     time_span = (df[COL_DATE].iloc[-1] - df[COL_DATE].iloc[0]).days
     if time_span < 2:

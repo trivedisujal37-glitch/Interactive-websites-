@@ -1249,15 +1249,16 @@ def plot_zentra_inventory_flow(df: pd.DataFrame | None = None) -> ChartResult:
 
 
 def calc_zentra_metrics(df: pd.DataFrame | None = None) -> dict[str, Any]:
-    """Calculate or aggregate high-level metrics matching Zentra reference."""
-    # Defaults matching reference
-    gross_spend = 41540.0
-    procurement = 26800.0
-    distribution = 10400.0
-    operations = 4340.0
-    transactions = 106000
-    suppliers_active = 1284
-    accuracy = 75
+    """Calculate or aggregate high-level metrics matching executive overview."""
+    gross_spend = 0.0
+    procurement = 0.0
+    distribution = 0.0
+    operations = 0.0
+    transactions = 0
+    suppliers_active = 0
+    accuracy = 85
+
+    base_vals = [65.2, 54.8, 48.6, 38.3, 32.9]
 
     if df is not None and not df.empty:
         # Check purchase cost or calculate proportional metrics
@@ -1269,28 +1270,51 @@ def calc_zentra_metrics(df: pd.DataFrame | None = None) -> dict[str, Any]:
                 gross_spend = procurement * 1.55
                 distribution = gross_spend * 0.25
                 operations = gross_spend * 0.10
+        elif "Current_Stock" in df.columns and "Unit_Price" in df.columns:
+            stock_val = float((df["Current_Stock"].fillna(0) * df["Unit_Price"].fillna(0)).sum())
+            if stock_val > 0:
+                gross_spend = stock_val
+                procurement = gross_spend * 0.65
+                distribution = gross_spend * 0.25
+                operations = gross_spend * 0.10
 
         if "Supplier_ID" in df.columns:
-            s_count = int(df["Supplier_ID"].nunique())
-            if s_count > 0:
-                suppliers_active = s_count
+            s_count = int(df["Supplier_ID"].dropna().nunique())
+            suppliers_active = s_count
 
-        if len(df) > 0:
-            transactions = len(df) * 150
+        if "Quantity_Demanded" in df.columns:
+            total_dem = float(pd.to_numeric(df["Quantity_Demanded"], errors="coerce").fillna(0).sum())
+            transactions = int(total_dem) if total_dem > 0 else len(df) * 10
+            scale = max(0.1, total_dem / 240.0)
+            base_vals = [round(v * scale, 1) for v in [65.2, 54.8, 48.6, 38.3, 32.9]]
+        else:
+            transactions = len(df) * 15
+
+    # Safe percentage bounds
+    denom = max(1.0, gross_spend)
+    p_pct = min(100, int((procurement / denom) * 100)) if gross_spend > 0 else 65
+    d_pct = min(100, int((distribution / denom) * 100)) if gross_spend > 0 else 25
+    o_pct = min(100, int((operations / denom) * 100)) if gross_spend > 0 else 10
 
     return {
-        "gross_spend_str": f"${gross_spend:,.0f}",
+        "gross_spend_str": f"${gross_spend:,.0f}" if gross_spend > 0 else "$0",
         "gross_spend_delta": "▲ 15%",
-        "procurement_str": f"${procurement:,.0f}",
-        "procurement_pct": min(100, int((procurement / max(1.0, gross_spend)) * 100)),
-        "distribution_str": f"${distribution:,.0f}",
-        "distribution_pct": min(100, int((distribution / max(1.0, gross_spend)) * 100)),
-        "operations_str": f"${operations:,.0f}",
-        "operations_pct": min(100, int((operations / max(1.0, gross_spend)) * 100)),
+        "procurement_str": f"${procurement:,.0f}" if procurement > 0 else "$0",
+        "procurement_pct": p_pct,
+        "distribution_str": f"${distribution:,.0f}" if distribution > 0 else "$0",
+        "distribution_pct": d_pct,
+        "operations_str": f"${operations:,.0f}" if operations > 0 else "$0",
+        "operations_pct": o_pct,
         "transactions_str": f"{int(transactions / 1000)}k" if transactions >= 1000 else str(transactions),
-        "transactions_delta": "+34,002",
+        "transactions_delta": f"+{max(1, int(transactions * 0.15)):,}",
         "suppliers_active_str": f"{suppliers_active:,}",
-        "suppliers_active_delta": "+320",
+        "suppliers_active_delta": f"+{max(1, int(suppliers_active * 0.1)):,}",
         "accuracy_str": f"{accuracy}%",
+        "stage_s1": f"{base_vals[0]:.1f}k" if base_vals[0] >= 1 else f"{base_vals[0]}",
+        "stage_s2": f"{base_vals[1]:.1f}k" if base_vals[1] >= 1 else f"{base_vals[1]}",
+        "stage_s3": f"{base_vals[2]:.1f}k" if base_vals[2] >= 1 else f"{base_vals[2]}",
+        "stage_s4": f"{base_vals[3]:.1f}k" if base_vals[3] >= 1 else f"{base_vals[3]}",
+        "stage_s5": f"{base_vals[4]:.1f}k" if base_vals[4] >= 1 else f"{base_vals[4]}",
     }
+
 

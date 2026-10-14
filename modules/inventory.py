@@ -26,6 +26,7 @@ def calculate_inventory(df):
         
     df['safety stock'] = 1.65 * std_demand * np.sqrt(df['lead time'])
     df['reorder point calc'] = (df['average demand'] * df['lead time']) + df['safety stock']
+    df['reorder point'] = df['reorder point calc']
     
     # Detect stock column
     stock_col = next((c for c in df.columns if 'stock' in c.lower() or 'qty' in c.lower() or 'quantity' in c.lower()), None)
