@@ -32,3 +32,16 @@ def test_supplier_metrics_without_delivery_time():
     assert res["status"] == "success"
     assert res["supplier_metrics"]["S1"]["total_quantity_supplied"] == 100.0
     assert res["supplier_metrics"]["S1"]["average_delivery_time_days"] is None
+
+
+def test_supplier_foxconn_total_quantity_supplied():
+    import os
+    sample_path = "sample_datasets/1_electronics_supply_chain.csv"
+    if os.path.exists(sample_path):
+        df = pd.read_csv(sample_path)
+        res = analyze_supplier(df)
+        assert res["status"] == "success"
+        foxconn = res["supplier_metrics"].get("SUP-FOXCONN")
+        assert foxconn is not None
+        assert foxconn["total_quantity_supplied"] == 3311.0
+
