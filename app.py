@@ -659,6 +659,8 @@ if "raw_df" not in st.session_state:
     st.session_state.raw_df = None
 if "dataset_name" not in st.session_state:
     st.session_state.dataset_name = None
+if "cleaning_report" not in st.session_state:
+    st.session_state.cleaning_report = None
 if "_last_optimization_findings" not in st.session_state:
     st.session_state._last_optimization_findings = None
 
@@ -772,38 +774,66 @@ page = option_menu(
 # 1. Data Management
 # -------------------------------------------------------------
 if page == "Data Management":
-    st.title("Data Management")
-    st.write("Upload supply chain datasets for analysis and optimization.")
+    from modules.data_management import load_and_clean_data
 
-    uploaded_file = st.file_uploader("Upload CSV Dataset", type=["csv"])
+    st.title("Data Management")
+    st.write("Upload supply chain datasets (.csv or .xlsx) for validation, cleaning, and optimization.")
+
+    uploaded_file = st.file_uploader("Upload Dataset (.csv or .xlsx)", type=["csv", "xlsx"])
     if uploaded_file is not None:
-        try:
-            df = pd.read_csv(uploaded_file)
-            df.columns = [str(c).strip() for c in df.columns]
-            df = df.loc[:, ~df.columns.duplicated(keep="first")]
-            if st.session_state.dataset_name != uploaded_file.name:
-                st.session_state.raw_df = df
-                st.session_state.dataset_name = uploaded_file.name
-                # Reset stale optimization findings on new dataset upload
-                st.session_state._last_optimization_findings = None
-                st.success(f"Loaded '{uploaded_file.name}' successfully ({len(df)} rows).")
-        except Exception as e:
-            st.error(f"Error reading CSV: {e}")
+        if st.session_state.dataset_name != uploaded_file.name:
+            try:
+                cleaned_df, report = load_and_clean_data(uploaded_file)
+                if "error" in report:
+                    st.error(report["error"])
+                else:
+                    st.session_state.raw_df = cleaned_df
+                    st.session_state.dataset_name = uploaded_file.name
+                    st.session_state.cleaning_report = report
+                    st.session_state._last_optimization_findings = None
+                    st.success(f"Loaded and cleaned '{uploaded_file.name}' successfully ({len(cleaned_df)} rows).")
+            except Exception as e:
+                st.error(f"Error reading and cleaning dataset: {e}")
+
+    # Display Cleaning Report if present
+    report = st.session_state.get("cleaning_report")
+    if report and "error" not in report:
+        with st.expander("📋 Data Cleaning & Validation Report", expanded=True):
+            r_c1, r_c2, r_c3, r_c4 = st.columns(4)
+            r_c1.metric("Rows Read", report.get("rows_read", 0))
+            r_c2.metric("Empty Rows Removed", report.get("rows_removed_empty", 0))
+            r_c3.metric("Duplicate Rows Removed", report.get("rows_removed_duplicates", 0))
+            r_c4.metric("Cleaned Rows", report.get("final", 0))
+
+            blanked = report.get("cells_blanked", {})
+            if blanked:
+                st.write("**Cells Set to Blank (Invalid / Negative Values):**")
+                for reason, count in blanked.items():
+                    st.write(f"- `{reason}`: {count} cell(s)")
+
+            warns = report.get("warnings", [])
+            if warns:
+                for w in warns:
+                    st.warning(w)
+
+            mod_readiness = report.get("module_readiness", {})
+            if mod_readiness:
+                st.write("**Page & Module Column Readiness:**")
+                for mod, note in mod_readiness.items():
+                    st.info(f"**{mod}:** {note}")
+            else:
+                st.success("All module column requirements are fully satisfied by this dataset.")
 
     if st.session_state.raw_df is not None:
-        st.subheader(f"Current Dataset: {st.session_state.dataset_name}")
+        st.subheader(f"Current Cleaned Dataset: {st.session_state.dataset_name}")
         st.dataframe(st.session_state.raw_df, use_container_width=True)
 
         if st.button("Clear uploaded data"):
             st.session_state.raw_df = None
             st.session_state.dataset_name = None
+            st.session_state.cleaning_report = None
             st.session_state._last_optimization_findings = None
             st.rerun()
-
-    st.caption(
-        "Note: Dataset validation, cleansing, and schema checking are owned by "
-        "teammates (Sujal/Manthan/Anshu) and will be integrated here."
-    )
 
 # -------------------------------------------------------------
 # 2. Home / Dashboard (Zentra Executive Reference View)
