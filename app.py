@@ -16,6 +16,7 @@ from utils.export import (
     export_to_excel,
     get_available_export_formats,
 )
+from utils.columns import find_col, find_cols
 
 st.set_page_config(page_title="Supply Chain Optimization System", layout="wide", page_icon="⚡")
 
@@ -658,6 +659,8 @@ if "raw_df" not in st.session_state:
     st.session_state.raw_df = None
 if "dataset_name" not in st.session_state:
     st.session_state.dataset_name = None
+if "cleaning_report" not in st.session_state:
+    st.session_state.cleaning_report = None
 if "_last_optimization_findings" not in st.session_state:
     st.session_state._last_optimization_findings = None
 
@@ -771,38 +774,66 @@ page = option_menu(
 # 1. Data Management
 # -------------------------------------------------------------
 if page == "Data Management":
-    st.title("Data Management")
-    st.write("Upload supply chain datasets for analysis and optimization.")
+    from modules.data_management import load_and_clean_data
 
-    uploaded_file = st.file_uploader("Upload CSV Dataset", type=["csv"])
+    st.title("Data Management")
+    st.write("Upload supply chain datasets (.csv or .xlsx) for validation, cleaning, and optimization.")
+
+    uploaded_file = st.file_uploader("Upload Dataset (.csv or .xlsx)", type=["csv", "xlsx"])
     if uploaded_file is not None:
-        try:
-            df = pd.read_csv(uploaded_file)
-            df.columns = [str(c).strip() for c in df.columns]
-            df = df.loc[:, ~df.columns.duplicated(keep="first")]
-            if st.session_state.dataset_name != uploaded_file.name:
-                st.session_state.raw_df = df
-                st.session_state.dataset_name = uploaded_file.name
-                # Reset stale optimization findings on new dataset upload
-                st.session_state._last_optimization_findings = None
-                st.success(f"Loaded '{uploaded_file.name}' successfully ({len(df)} rows).")
-        except Exception as e:
-            st.error(f"Error reading CSV: {e}")
+        if st.session_state.dataset_name != uploaded_file.name:
+            try:
+                cleaned_df, report = load_and_clean_data(uploaded_file)
+                if "error" in report:
+                    st.error(report["error"])
+                else:
+                    st.session_state.raw_df = cleaned_df
+                    st.session_state.dataset_name = uploaded_file.name
+                    st.session_state.cleaning_report = report
+                    st.session_state._last_optimization_findings = None
+                    st.success(f"Loaded and cleaned '{uploaded_file.name}' successfully ({len(cleaned_df)} rows).")
+            except Exception as e:
+                st.error(f"Error reading and cleaning dataset: {e}")
+
+    # Display Cleaning Report if present
+    report = st.session_state.get("cleaning_report")
+    if report and "error" not in report:
+        with st.expander("📋 Data Cleaning & Validation Report", expanded=True):
+            r_c1, r_c2, r_c3, r_c4 = st.columns(4)
+            r_c1.metric("Rows Read", report.get("rows_read", 0))
+            r_c2.metric("Empty Rows Removed", report.get("rows_removed_empty", 0))
+            r_c3.metric("Duplicate Rows Removed", report.get("rows_removed_duplicates", 0))
+            r_c4.metric("Cleaned Rows", report.get("final", 0))
+
+            blanked = report.get("cells_blanked", {})
+            if blanked:
+                st.write("**Cells Set to Blank (Invalid / Negative Values):**")
+                for reason, count in blanked.items():
+                    st.write(f"- `{reason}`: {count} cell(s)")
+
+            warns = report.get("warnings", [])
+            if warns:
+                for w in warns:
+                    st.warning(w)
+
+            mod_readiness = report.get("module_readiness", {})
+            if mod_readiness:
+                st.write("**Page & Module Column Readiness:**")
+                for mod, note in mod_readiness.items():
+                    st.info(f"**{mod}:** {note}")
+            else:
+                st.success("All module column requirements are fully satisfied by this dataset.")
 
     if st.session_state.raw_df is not None:
-        st.subheader(f"Current Dataset: {st.session_state.dataset_name}")
+        st.subheader(f"Current Cleaned Dataset: {st.session_state.dataset_name}")
         st.dataframe(st.session_state.raw_df, use_container_width=True)
 
         if st.button("Clear uploaded data"):
             st.session_state.raw_df = None
             st.session_state.dataset_name = None
+            st.session_state.cleaning_report = None
             st.session_state._last_optimization_findings = None
             st.rerun()
-
-    st.caption(
-        "Note: Dataset validation, cleansing, and schema checking are owned by "
-        "teammates (Sujal/Manthan/Anshu) and will be integrated here."
-    )
 
 # -------------------------------------------------------------
 # 2. Home / Dashboard (Zentra Executive Reference View)
@@ -851,41 +882,25 @@ elif page in ["Home", "Dashboard"]:
         clean_df = standardize_dataframe(raw_df)
         clean_df = clean_df.loc[:, ~clean_df.columns.duplicated(keep="first")]
 
-        if "Current_Stock" not in clean_df.columns:
-            clean_df["Current_Stock"] = 100.0
-
-        if "Quantity_Demanded" not in clean_df.columns:
-            clean_df["Quantity_Demanded"] = clean_df["Current_Stock"].fillna(10.0)
-
-        if "Date" not in clean_df.columns or clean_df["Date"].isna().all():
-            clean_df["Date"] = pd.date_range("2024-01-15", periods=len(clean_df), freq="D" if len(clean_df) > 30 else "30D")
-
-        if "Supplier_ID" not in clean_df.columns:
-            if "Category" in clean_df.columns and clean_df["Category"].notna().any():
-                clean_df["Supplier_ID"] = "SUP-" + clean_df["Category"].fillna("GEN").astype(str).str[:4].str.upper()
-            else:
-                clean_df["Supplier_ID"] = [f"SUP-{chr(65 + (i % 4))}" for i in range(len(clean_df))]
-
-        if "Quantity_Supplied" not in clean_df.columns:
-            clean_df["Quantity_Supplied"] = clean_df["Current_Stock"].fillna(100.0)
-
-        if "Delivery_Time" not in clean_df.columns:
-            default_leads = [3.5, 5.0, 2.0, 4.0, 6.0, 2.5, 7.0]
-            clean_df["Delivery_Time"] = [default_leads[i % len(default_leads)] for i in range(len(clean_df))]
-
-        clean_df = clean_df.loc[:, ~clean_df.columns.duplicated(keep="first")]
         z_metrics = calc_zentra_metrics(clean_df)
 
-        # Overview Subheader Row
-        st.markdown("""
+        # Overview Subheader Row with real date pill
+        d_col = find_col(raw_df, "date")
+        date_pill_html = ""
+        if d_col and d_col in raw_df.columns:
+            dt_s = pd.to_datetime(raw_df[d_col], errors="coerce").dropna()
+            if not dt_s.empty:
+                d_min_str = dt_s.min().strftime("%b %d, %Y")
+                d_max_str = dt_s.max().strftime("%b %d, %Y")
+                date_pill_html = f'<div class="ctrl-pill-btn date-range-pill">{d_min_str} — {d_max_str}</div>'
+
+        st.markdown(f"""
             <div class="zentra-overview-head">
                 <div class="overview-title-wrap">
                     <h1 class="overview-title">Overview</h1>
                 </div>
                 <div class="overview-ctrls-wrap">
-                    <div class="ctrl-pill-btn"><span>◫ Compare</span> <span style="font-size: 9px; margin-left: 2px;">▼</span></div>
-                    <div class="ctrl-pill-btn date-range-pill">Jan 01 — July 31 <span class="vs-badge">vs</span> Aug 01 — Dec 31</div>
-                    <div class="ctrl-pill-btn add-widget-btn">Add widget +</div>
+                    {date_pill_html}
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -930,6 +945,8 @@ elif page in ["Home", "Dashboard"]:
                 pay_chart_res = plot_zentra_payments_and_costs(clean_df)
                 if pay_chart_res.available and pay_chart_res.figure is not None:
                     st.plotly_chart(pay_chart_res.figure, use_container_width=True, config={"displayModeBar": False}, key="zentra_pay_chart")
+                elif pay_chart_res.unavailable_reason:
+                    st.info(f"Payments & Costs: Not available — {pay_chart_res.unavailable_reason}")
 
                 st.markdown("""
                     <div class="ai-explore-wrap">
@@ -1000,6 +1017,8 @@ elif page in ["Home", "Dashboard"]:
                 flow_chart_res = plot_zentra_inventory_flow(clean_df)
                 if flow_chart_res.available and flow_chart_res.figure is not None:
                     st.plotly_chart(flow_chart_res.figure, use_container_width=True, config={"displayModeBar": False}, key="zentra_flow_chart")
+                elif flow_chart_res.unavailable_reason:
+                    st.info(f"Inventory Flow: Not available — {flow_chart_res.unavailable_reason}")
 
         # Center: Transactions & Suppliers Active
         with r2_col2:
@@ -1136,19 +1155,27 @@ elif page in ["Home", "Dashboard"]:
                     c1_res = plot_c1_demand_by_category(global_df)
                     if c1_res.available and c1_res.figure is not None:
                         st.plotly_chart(c1_res.figure, use_container_width=True, key="mat_c1")
+                    elif c1_res.unavailable_reason:
+                        st.info(f"Demand by Category: Not available — {c1_res.unavailable_reason}")
 
                     c3_res = plot_c3_demand_by_quarter_month(global_df)
                     if c3_res.available and c3_res.figure is not None:
                         st.plotly_chart(c3_res.figure, use_container_width=True, key="mat_c3")
+                    elif c3_res.unavailable_reason:
+                        st.info(f"Quarter/Month Demand: Not available — {c3_res.unavailable_reason}")
 
                 with ch_right:
                     c2_res = plot_c2_stock_status_mix(inv_metrics_df)
                     if c2_res.available and c2_res.figure is not None:
                         st.plotly_chart(c2_res.figure, use_container_width=True, key="mat_c2")
+                    elif c2_res.unavailable_reason:
+                        st.info(f"Stock Status Mix: Not available — {c2_res.unavailable_reason}")
 
                     c4_res = plot_c4_top_items_demand(global_df)
                     if c4_res.available and c4_res.figure is not None:
                         st.plotly_chart(c4_res.figure, use_container_width=True, key="mat_c4")
+                    elif c4_res.unavailable_reason:
+                        st.info(f"Top Items Demand: Not available — {c4_res.unavailable_reason}")
 
 
 

@@ -1,51 +1,63 @@
+"""Supplier analysis module for Supply Chain Optimization System.
+
+Calculates supplier delivery lead times, supply consistency, and total quantities supplied
+using strict canonical column resolution without fuzzy column guessing.
+"""
+
+from typing import Any
 import pandas as pd
-import numpy as np
+from utils.columns import find_col
 
-COL_SUPPLIER = "supplier_id"
-COL_DELIVERY_TIME = "delivery_time_days"
-COL_QUANTITY_SUPPLIED = "quantity_supplied"
 
-def analyze_supplier(df: pd.DataFrame) -> dict:
+def analyze_supplier(df: pd.DataFrame) -> dict[str, Any]:
+    """Analyze supplier metrics across delivery time and quantity supplied."""
     if df is None or df.empty:
         return {"status": "error", "reason": "Supplier analysis unavailable because data is empty."}
-        
-    sup_col = next((c for c in df.columns if 'supplier' in c.lower()), None)
-    if not sup_col:
-        return {"status": "error", "reason": "Supplier analysis unavailable because supplier information was not provided."}
-        
-    df = df.copy()
-    if sup_col != COL_SUPPLIER:
-        df[COL_SUPPLIER] = df[sup_col]
 
-    if COL_QUANTITY_SUPPLIED not in df.columns:
-        qty_col = next((c for c in df.columns if 'qty' in c.lower() or 'quantity' in c.lower() or 'stock' in c.lower()), None)
-        if qty_col:
-            df[COL_QUANTITY_SUPPLIED] = df[qty_col]
-            
-    if COL_DELIVERY_TIME not in df.columns:
-        del_col = next((c for c in df.columns if 'delivery' in c.lower() or 'lead' in c.lower()), None)
-        if del_col:
-            df[COL_DELIVERY_TIME] = df[del_col]
+    df_copy = df.copy()
 
-    df = df.dropna(subset=[COL_SUPPLIER]).copy()
-    if df.empty:
-        return {"status": "error", "reason": "Supplier analysis unavailable because supplier information was not provided."}
+    col_sup = find_col(df_copy, "supplier_id")
+    if not col_sup:
+        return {
+            "status": "error",
+            "reason": "Supplier analysis unavailable because supplier information was not provided."
+        }
 
+    col_del = find_col(df_copy, "delivery_time")
+    col_qty = find_col(df_copy, "quantity_supplied")
+
+    df_valid = df_copy.dropna(subset=[col_sup]).copy()
+    if df_valid.empty:
+        return {
+            "status": "error",
+            "reason": "Supplier analysis unavailable because supplier information was not provided."
+        }
 
     supplier_stats = {}
-    grouped = df.groupby(COL_SUPPLIER)
+    grouped = df_valid.groupby(col_sup)
 
     for supplier_id, group in grouped:
-        stats = {}
-        
-        if COL_QUANTITY_SUPPLIED in df.columns:
-            stats["total_quantity_supplied"] = float(group[COL_QUANTITY_SUPPLIED].sum())
+        stats: dict[str, Any] = {}
+
+        if col_qty and col_qty in group.columns:
+            qty_series = pd.to_numeric(group[col_qty], errors="coerce").dropna()
+            if not qty_series.empty:
+                stats["total_quantity_supplied"] = float(qty_series.sum())
+            else:
+                stats["total_quantity_supplied"] = None
+                stats["quantity_note"] = "No valid quantity supplied values for this supplier."
         else:
             stats["total_quantity_supplied"] = None
-            
-        if COL_DELIVERY_TIME in df.columns:
-            stats["average_delivery_time_days"] = float(group[COL_DELIVERY_TIME].mean())
-            stats["supply_consistency_std"] = float(group[COL_DELIVERY_TIME].std()) if len(group) > 1 else 0.0
+            stats["quantity_note"] = "Quantity supplied column not provided in dataset."
+
+        if col_del and col_del in group.columns:
+            del_series = pd.to_numeric(group[col_del], errors="coerce").dropna()
+            if not del_series.empty:
+                stats["average_delivery_time_days"] = float(del_series.mean())
+                stats["supply_consistency_std"] = float(del_series.std()) if len(del_series) > 1 else 0.0
+            else:
+                stats["average_delivery_time_days"] = None
+                stats["supply_consistency_std"] = None
         else:
             stats["average_delivery_time_days"] = None
             stats["supply_consistency_std"] = None

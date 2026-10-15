@@ -1,0 +1,23 @@
+Date,Item_ID,Item_Name,Category,Current Stock,Reorder Point,Max Stock Level,Demand,Unit Price,Purchase Cost,Holding Cost,Transportation Cost,Supplier_ID,Delivery Time,Quantity Supplied
+2024-01-01,ITEM-001,Widget Normal,Electronics,100,50,200,20,10.0,100.0,10.0,5.0,SUP-A,3.0,50
+2024-01-02,,Widget Missing ID,Electronics,120,60,250,25,12.0,120.0,12.0,6.0,SUP-A,3.0,0
+,ITEM-003,Widget Missing Date,Electronics,110,55,220,15,11.0,110.0,11.0,5.5,SUP-B,4.0,40
+2024-01-04,ITEM-004,Widget Missing Demand,Electronics,90,45,180,,9.0,90.0,9.0,4.5,SUP-B,2.0,0
+2024-02-31,ITEM-005,Widget Impossible Date,Electronics,80,40,160,10,8.0,80.0,8.0,4.0,SUP-A,3.5,0
+31/12/2023,ITEM-006,Widget DDMMYYYY Date,Electronics,70,35,140,12,7.0,70.0,7.0,3.5,SUP-C,5.0,20
+2024-01-07,ITEM-007,Widget Negative Demand,Electronics,60,30,120,-15,6.0,60.0,6.0,3.0,SUP-A,2.5,0
+2024-01-08,ITEM-008,Widget Negative Price,Electronics,50,25,100,10,-25.0,50.0,5.0,2.5,SUP-B,3.0,0
+2024-01-09,ITEM-009,Widget Negative Lead Time,Electronics,40,20,80,8,5.0,40.0,4.0,2.0,SUP-A,-4.0,0
+2024-01-10,ITEM-010,Widget Text In Stock,Electronics,TEN,15,60,6,4.0,30.0,3.0,1.5,SUP-C,1.5,0
+2024-01-11,ITEM-011,Widget Fractional Stock,Electronics,12.5,10,50,5,3.0,20.0,2.0,1.0,SUP-A,2.0,0
+2024-01-12,ITEM-012,Widget Outlier Demand,Electronics,300,100,500,999999,50.0,500.0,50.0,25.0,SUP-B,4.0,100
+2024-01-13,ITEM-013,Widget Duplicate Row,Electronics,100,50,200,20,10.0,100.0,10.0,5.0,SUP-A,3.0,0
+2024-01-13,ITEM-013,Widget Duplicate Row,Electronics,100,50,200,20,10.0,100.0,10.0,5.0,SUP-A,3.0,0
+2024-01-14,ITEM-014,  Widget Space Problem  , ELECTRONICS ,150,75,300,30,15.0,150.0,15.0,7.5,SUP-A,3.0,0
+2024-01-15,,,,,,,,,SUP-ORPHAN,2.0,500
+2024-01-16,ITEM-016,Widget Negative Qty Supplied,Electronics,85,40,170,18,8.5,85.0,8.5,4.25,SUP-A,3.0,-100
+2024-01-17,ITEM-017,Widget Negative Transport,Electronics,95,45,190,19,9.5,95.0,9.5,-50.0,SUP-B,3.0,0
+2024-01-18,ITEM-018,Widget Negative Holding,Electronics,105,50,210,21,10.5,105.0,-20.0,5.0,SUP-C,3.0,0
+2024-01-19,ITEM-019,Widget Text In Price,Electronics,115,55,230,22,$45.00,115.0,11.5,5.5,SUP-A,3.0,0
+2024-01-20,ITEM-020,Widget Zero Lead Time,Electronics,125,60,250,23,12.5,125.0,12.5,6.0,SUP-B,0,0
+2024-01-21,ITEM-021,Widget Blank Delivery,Electronics,135,65,270,24,13.5,135.0,13.5,6.5,SUP-C,,
