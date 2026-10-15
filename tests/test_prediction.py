@@ -48,3 +48,31 @@ def test_prediction_chronological_split():
     assert res["status"] == "success"
     # Should correctly sort dates, training start should be the earliest date
     assert res["training_period"]["start"] == dates[0]
+
+
+def test_prediction_deterministic_and_no_mutation():
+    import os
+    sample_path = "sample_datasets/1_electronics_supply_chain.csv"
+    if os.path.exists(sample_path):
+        df = pd.read_csv(sample_path)
+        orig_cols = list(df.columns)
+        r1 = run_prediction(df)
+        r2 = run_prediction(df)
+        r3 = run_prediction(df)
+        assert r1["status"] == "success"
+        assert r1["evaluation"]["mae"] == r2["evaluation"]["mae"] == r3["evaluation"]["mae"]
+        assert r1["future_predictions"] == r2["future_predictions"] == r3["future_predictions"]
+        # Non-mutation of input
+        assert list(df.columns) == orig_cols
+        # Check limitation and label
+        assert "limitation" in r1
+        assert "label" in r1
+
+
+def test_prediction_missing_columns_unavailable():
+    df = pd.DataFrame({"Item": ["A", "B"], "Current Stock": [100, 200]})
+    res = run_prediction(df)
+    assert res["status"] == "Prediction unavailable"
+    assert "missing" in res["reason"].lower()
+    assert "demand" not in df.columns
+    assert "date" not in df.columns

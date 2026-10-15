@@ -71,3 +71,26 @@ def test_demand_missing_optional_fields():
     res = analyze_demand(df, agg_level='category')
     assert res["status"] == "success"
     assert "by_category" not in res["aggregations"]
+
+
+def test_demand_real_sum_and_no_mutation():
+    import os
+    sample_path = "sample_datasets/1_electronics_supply_chain.csv"
+    if os.path.exists(sample_path):
+        df = pd.read_csv(sample_path)
+        orig_cols = list(df.columns)
+        res = analyze_demand(df)
+        assert res["status"] == "success"
+        assert res["metrics"]["total"] == 8536.0
+        # Assert non-mutation of input
+        assert list(df.columns) == orig_cols
+
+
+def test_demand_missing_columns_returns_unavailable():
+    df = pd.DataFrame({"Item": ["A", "B"], "Stock": [10, 20]})
+    res = analyze_demand(df)
+    assert res["status"] == "error"
+    assert "Demand analysis unavailable" in res["reason"]
+    # Verify no random column was injected
+    assert "demand" not in df.columns
+    assert "date" not in df.columns
