@@ -50,16 +50,18 @@ def test_analyze_cost_all_columns_present():
     assert res.totals["Purchase Cost"] == 300.0
     assert res.totals["Holding Cost"] == 20.0
     assert res.totals["Transportation Cost"] == 10.0
-    assert res.totals["Total Combined Cost"] == 360.0
+    # Corrected per F1: exclude Unit Price from Total Combined Cost
+    assert res.totals["Total Combined Cost"] == 330.0
+    assert res.totals["Average Unit Price"] == 15.0
 
     # Item level assertions
     assert res.item_level is not None
     assert "Total Cost" in res.item_level.columns
-    # Gadget total cost: 20 + 200 + 15 + 8 = 243; Widget: 10 + 100 + 5 + 2 = 117
+    # Gadget expenditure total cost: 200 + 15 + 8 = 223; Widget: 100 + 5 + 2 = 107
     assert res.item_level.iloc[0]["Item"] == "Gadget"
-    assert res.item_level.iloc[0]["Total Cost"] == 243.0
+    assert res.item_level.iloc[0]["Total Cost"] == 223.0
     assert res.item_level.iloc[1]["Item"] == "Widget"
-    assert res.item_level.iloc[1]["Total Cost"] == 117.0
+    assert res.item_level.iloc[1]["Total Cost"] == 107.0
 
     # Category level assertions
     assert res.category_level is not None
