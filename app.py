@@ -16,6 +16,7 @@ from utils.export import (
     export_to_excel,
     get_available_export_formats,
 )
+from utils.columns import find_col, find_cols
 
 st.set_page_config(page_title="Supply Chain Optimization System", layout="wide", page_icon="⚡")
 
@@ -851,41 +852,25 @@ elif page in ["Home", "Dashboard"]:
         clean_df = standardize_dataframe(raw_df)
         clean_df = clean_df.loc[:, ~clean_df.columns.duplicated(keep="first")]
 
-        if "Current_Stock" not in clean_df.columns:
-            clean_df["Current_Stock"] = 100.0
-
-        if "Quantity_Demanded" not in clean_df.columns:
-            clean_df["Quantity_Demanded"] = clean_df["Current_Stock"].fillna(10.0)
-
-        if "Date" not in clean_df.columns or clean_df["Date"].isna().all():
-            clean_df["Date"] = pd.date_range("2024-01-15", periods=len(clean_df), freq="D" if len(clean_df) > 30 else "30D")
-
-        if "Supplier_ID" not in clean_df.columns:
-            if "Category" in clean_df.columns and clean_df["Category"].notna().any():
-                clean_df["Supplier_ID"] = "SUP-" + clean_df["Category"].fillna("GEN").astype(str).str[:4].str.upper()
-            else:
-                clean_df["Supplier_ID"] = [f"SUP-{chr(65 + (i % 4))}" for i in range(len(clean_df))]
-
-        if "Quantity_Supplied" not in clean_df.columns:
-            clean_df["Quantity_Supplied"] = clean_df["Current_Stock"].fillna(100.0)
-
-        if "Delivery_Time" not in clean_df.columns:
-            default_leads = [3.5, 5.0, 2.0, 4.0, 6.0, 2.5, 7.0]
-            clean_df["Delivery_Time"] = [default_leads[i % len(default_leads)] for i in range(len(clean_df))]
-
-        clean_df = clean_df.loc[:, ~clean_df.columns.duplicated(keep="first")]
         z_metrics = calc_zentra_metrics(clean_df)
 
-        # Overview Subheader Row
-        st.markdown("""
+        # Overview Subheader Row with real date pill
+        d_col = find_col(raw_df, "date")
+        date_pill_html = ""
+        if d_col and d_col in raw_df.columns:
+            dt_s = pd.to_datetime(raw_df[d_col], errors="coerce").dropna()
+            if not dt_s.empty:
+                d_min_str = dt_s.min().strftime("%b %d, %Y")
+                d_max_str = dt_s.max().strftime("%b %d, %Y")
+                date_pill_html = f'<div class="ctrl-pill-btn date-range-pill">{d_min_str} — {d_max_str}</div>'
+
+        st.markdown(f"""
             <div class="zentra-overview-head">
                 <div class="overview-title-wrap">
                     <h1 class="overview-title">Overview</h1>
                 </div>
                 <div class="overview-ctrls-wrap">
-                    <div class="ctrl-pill-btn"><span>◫ Compare</span> <span style="font-size: 9px; margin-left: 2px;">▼</span></div>
-                    <div class="ctrl-pill-btn date-range-pill">Jan 01 — July 31 <span class="vs-badge">vs</span> Aug 01 — Dec 31</div>
-                    <div class="ctrl-pill-btn add-widget-btn">Add widget +</div>
+                    {date_pill_html}
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -930,6 +915,8 @@ elif page in ["Home", "Dashboard"]:
                 pay_chart_res = plot_zentra_payments_and_costs(clean_df)
                 if pay_chart_res.available and pay_chart_res.figure is not None:
                     st.plotly_chart(pay_chart_res.figure, use_container_width=True, config={"displayModeBar": False}, key="zentra_pay_chart")
+                elif pay_chart_res.unavailable_reason:
+                    st.info(f"Payments & Costs: Not available — {pay_chart_res.unavailable_reason}")
 
                 st.markdown("""
                     <div class="ai-explore-wrap">
@@ -1000,6 +987,8 @@ elif page in ["Home", "Dashboard"]:
                 flow_chart_res = plot_zentra_inventory_flow(clean_df)
                 if flow_chart_res.available and flow_chart_res.figure is not None:
                     st.plotly_chart(flow_chart_res.figure, use_container_width=True, config={"displayModeBar": False}, key="zentra_flow_chart")
+                elif flow_chart_res.unavailable_reason:
+                    st.info(f"Inventory Flow: Not available — {flow_chart_res.unavailable_reason}")
 
         # Center: Transactions & Suppliers Active
         with r2_col2:
@@ -1136,19 +1125,27 @@ elif page in ["Home", "Dashboard"]:
                     c1_res = plot_c1_demand_by_category(global_df)
                     if c1_res.available and c1_res.figure is not None:
                         st.plotly_chart(c1_res.figure, use_container_width=True, key="mat_c1")
+                    elif c1_res.unavailable_reason:
+                        st.info(f"Demand by Category: Not available — {c1_res.unavailable_reason}")
 
                     c3_res = plot_c3_demand_by_quarter_month(global_df)
                     if c3_res.available and c3_res.figure is not None:
                         st.plotly_chart(c3_res.figure, use_container_width=True, key="mat_c3")
+                    elif c3_res.unavailable_reason:
+                        st.info(f"Quarter/Month Demand: Not available — {c3_res.unavailable_reason}")
 
                 with ch_right:
                     c2_res = plot_c2_stock_status_mix(inv_metrics_df)
                     if c2_res.available and c2_res.figure is not None:
                         st.plotly_chart(c2_res.figure, use_container_width=True, key="mat_c2")
+                    elif c2_res.unavailable_reason:
+                        st.info(f"Stock Status Mix: Not available — {c2_res.unavailable_reason}")
 
                     c4_res = plot_c4_top_items_demand(global_df)
                     if c4_res.available and c4_res.figure is not None:
                         st.plotly_chart(c4_res.figure, use_container_width=True, key="mat_c4")
+                    elif c4_res.unavailable_reason:
+                        st.info(f"Top Items Demand: Not available — {c4_res.unavailable_reason}")
 
 
 
