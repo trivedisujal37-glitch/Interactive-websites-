@@ -77,60 +77,6 @@ st.markdown("""
         border-radius: 6px;
         margin-left: 2px;
     }
-    .zentra-header-right {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-    .zentra-tool-btn {
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        background: rgba(17, 23, 38, 0.85);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #94A3B8;
-        cursor: pointer;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-    }
-    .zentra-tool-btn:hover {
-        background: rgba(22, 30, 48, 0.95);
-        color: #FFFFFF;
-        border-color: rgba(16, 185, 129, 0.4);
-        box-shadow: 0 0 16px rgba(16, 185, 129, 0.25);
-        transform: translateY(-1px);
-    }
-    .green-dot {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        width: 6px;
-        height: 6px;
-        background: #10B981;
-        border-radius: 50%;
-        box-shadow: 0 0 8px #10B981;
-    }
-    .zentra-avatar-pill {
-        display: flex;
-        align-items: center;
-    }
-    .avatar-circle {
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #10B981 0%, #00F2FE 50%, #8B5CF6 100%);
-        padding: 2px;
-        box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 13px;
-        font-weight: 800;
-        color: #FFFFFF;
-    }
 
     /* Elevated Glassmorphic Slate Cards (Specification 1) */
     div[data-testid="stVerticalBlockBorderWrapper"], .zentra-glass-card {
@@ -703,18 +649,6 @@ st.markdown("""
             </div>
             <span class="zentra-brand-text">Supply Chain Optimization</span>
             <span class="pro-badge">ENTERPRISE</span>
-        </div>
-        <div class="zentra-header-right">
-            <div class="zentra-tool-btn" title="Search">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            </div>
-            <div class="zentra-tool-btn notification-tool" title="Notifications">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                <span class="green-dot"></span>
-            </div>
-            <div class="zentra-avatar-pill">
-                <div class="avatar-circle">SC</div>
-            </div>
         </div>
     </div>
 """, unsafe_allow_html=True)
