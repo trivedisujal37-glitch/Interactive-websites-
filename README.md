@@ -63,6 +63,12 @@ The application includes a centralized canonical column resolver (`utils/columns
 - **Demand Forecasting**:
   Simple Moving Average ($\text{window} = 3$) with chronological 80/20 train/test evaluation.
 
+### Inventory Status Note
+In datasets such as `data/supply_chain_sample_data.csv`, a large majority of rows (1,368 of 1,456) receive the "Overstock" status. This is an inherent property of the dataset's scale, not a calculation bug:
+- Median Current Stock is 415.0 units, while median average demand is 12.02 units/day and median lead time is 3.85 days.
+- The resulting median Reorder Point is 58.57 units.
+- Under the status threshold `stock gap > (reorder point * 2) + 1` (i.e. `Current Stock > 3 * ROP + 1` ≈ 176.7 units), on-hand stock (median 415 units, or ~35 days of buffer against a ~3.8-day lead time) substantially exceeds reorder thresholds and is legitimately categorized as Overstock.
+
 ---
 
 ## Limitations
