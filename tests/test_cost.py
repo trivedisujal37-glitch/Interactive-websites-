@@ -46,11 +46,11 @@ def test_analyze_cost_all_columns_present():
     assert res.available
     assert res.message is None
     assert set(res.columns_used) == set(SUPPORTED_COST_COLUMNS)
-    assert res.totals["Unit Price"] == 30.0
+    assert "Unit Price" not in res.totals
     assert res.totals["Purchase Cost"] == 300.0
     assert res.totals["Holding Cost"] == 20.0
     assert res.totals["Transportation Cost"] == 10.0
-    # Corrected per F1: exclude Unit Price from Total Combined Cost
+    # Corrected per F1 & Fix 2: exclude Unit Price from totals and Total Combined Cost
     assert res.totals["Total Combined Cost"] == 330.0
     assert res.totals["Average Unit Price"] == 15.0
 
@@ -104,3 +104,21 @@ def test_analyze_cost_category_auto_detection():
     assert res.category_level.iloc[0]["Total Cost"] == 300.0
     assert res.category_level.iloc[1]["Item Category"] == "Hardware"
     assert res.category_level.iloc[1]["Purchase Cost"] == 50.0
+
+
+def test_analyze_cost_sample_dataset_expected_values():
+    import os
+    path = os.path.join(
+        os.path.dirname(__file__), "..", "sample_datasets", "1_electronics_supply_chain.csv"
+    )
+    if os.path.exists(path):
+        df = pd.read_csv(path)
+        res = analyze_cost(df)
+        assert res.available
+        assert "Unit Price" not in res.totals
+        assert round(res.totals["Purchase Cost"], 1) == 1782443.0
+        assert round(res.totals["Holding Cost"], 1) == 74876.9
+        assert round(res.totals["Transportation Cost"], 1) == 46937.6
+        assert round(res.totals["Total Combined Cost"], 1) == 1904257.5
+        assert round(res.totals["Average Unit Price"], 1) == 80.0
+

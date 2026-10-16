@@ -86,11 +86,11 @@ def analyze_cost(
     for col in columns_used:
         df_numeric[col] = pd.to_numeric(df_numeric[col], errors="coerce").fillna(0.0)
 
-    # Calculate individual column sums
-    totals = {col: float(df_numeric[col].sum()) for col in columns_used}
-
     # Expenditure columns (excluding Unit Price)
     expenditure_cols = [c for c in columns_used if c != col_unit_price]
+
+    # Calculate individual expenditure column sums (Unit Price is an intensive rate, not summed)
+    totals = {col: float(df_numeric[col].sum()) for col in expenditure_cols}
     totals["Total Combined Cost"] = float(sum(totals[col] for col in expenditure_cols))
 
     if col_unit_price and col_unit_price in df_numeric.columns:
@@ -112,8 +112,9 @@ def analyze_cost(
     resolved_category_col = category_col or find_col(df_numeric, "category")
     category_level = None
     if resolved_category_col and resolved_category_col in df_numeric.columns:
+        category_summary_cols = expenditure_cols if expenditure_cols else columns_used
         category_level = (
-            df_numeric.groupby(resolved_category_col, as_index=False)[columns_used]
+            df_numeric.groupby(resolved_category_col, as_index=False)[category_summary_cols]
             .sum()
         )
         if expenditure_cols:
