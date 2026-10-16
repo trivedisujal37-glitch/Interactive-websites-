@@ -111,14 +111,15 @@ def test_analyze_cost_sample_dataset_expected_values():
     path = os.path.join(
         os.path.dirname(__file__), "..", "sample_datasets", "1_electronics_supply_chain.csv"
     )
-    if os.path.exists(path):
-        df = pd.read_csv(path)
-        res = analyze_cost(df)
-        assert res.available
-        assert "Unit Price" not in res.totals
-        assert round(res.totals["Purchase Cost"], 1) == 1782443.0
-        assert round(res.totals["Holding Cost"], 1) == 74876.9
-        assert round(res.totals["Transportation Cost"], 1) == 46937.6
-        assert round(res.totals["Total Combined Cost"], 1) == 1904257.5
-        assert round(res.totals["Average Unit Price"], 1) == 80.0
+    assert os.path.exists(path), path
+    df = pd.read_csv(path)
+    res = analyze_cost(df)
+    assert res.available
+    assert "Unit Price" not in res.totals
+    assert round(res.totals["Purchase Cost"], 1) == 1782443.0
+    assert round(res.totals["Holding Cost"], 1) == 74876.9
+    assert round(res.totals["Transportation Cost"], 1) == 46937.6
+    assert round(res.totals["Total Combined Cost"], 1) == 1904257.5
+    assert round(res.totals["Average Unit Price"], 1) == 80.0
+
 
