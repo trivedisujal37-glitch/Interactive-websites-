@@ -56,4 +56,16 @@ def test_excel_upload_and_blank_delivery_time(tmp_path):
     assert pd.isna(cleaned["Delivery Time"].iloc[0])
     assert cleaned["Delivery Time"].iloc[1] == 3.5
     assert "Demand Prediction" in report["module_readiness"]  # missing date
+ 
+
+def test_category_whitespace_trimmed_without_casing_change(tmp_path):
+    df_raw = pd.DataFrame({
+        "Item": ["Item 1", "Item 2"],
+        "Category": ["FMCG", " Dairy  Products "]
+    })
+    p = tmp_path / "test_cat.csv"
+    df_raw.to_csv(p, index=False)
+    cleaned, _ = load_and_clean_data(str(p))
+    assert cleaned["Category"].iloc[0] == "FMCG"
+    assert cleaned["Category"].iloc[1] == "Dairy Products"
 

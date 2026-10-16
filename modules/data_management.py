@@ -130,12 +130,12 @@ def load_and_clean_data(file_or_df: Any) -> tuple[pd.DataFrame, dict[str, Any]]:
         if zero_leads > 0:
             warnings.append(f"{zero_leads} row(s) report 0 days delivery/lead time (review delivery feasibility).")
 
-    # 9. Normalize category casing per item
+    # 9. Clean category whitespace without modifying text casing
     col_cat = find_col(df, "category")
     col_item = find_col(df, "item_id") or find_col(df, "item_name")
     if col_cat and col_cat in df.columns:
         df[col_cat] = df[col_cat].map(
-            lambda x: " ".join(str(x).split()).title() if pd.notna(x) and str(x).strip() != "" else np.nan
+            lambda x: " ".join(str(x).split()) if pd.notna(x) and str(x).strip() != "" else np.nan
         )
         if col_item and col_item in df.columns:
             df[col_cat] = df.groupby(col_item)[col_cat].transform(lambda s: s.ffill().bfill())
