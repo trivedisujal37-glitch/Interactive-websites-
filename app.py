@@ -171,17 +171,6 @@ st.markdown("""
         font-weight: 700;
         letter-spacing: -0.2px;
     }
-    .card-dots-btn {
-        color: #64748B;
-        font-size: 1.1rem;
-        cursor: pointer;
-        padding: 0 4px;
-        line-height: 1;
-        transition: color 0.2s ease;
-    }
-    .card-dots-btn:hover {
-        color: #10B981;
-    }
 
     /* 5 Stages Metrics Row */
     .stages-metrics-row {
@@ -217,41 +206,6 @@ st.markdown("""
     .active-stage .stage-val {
         color: #10B981 !important;
         text-shadow: 0 0 14px rgba(16, 185, 129, 0.6);
-    }
-
-    /* AI Exploration Pill Bar */
-    .ai-explore-wrap {
-        background: linear-gradient(180deg, rgba(17, 23, 38, 0.9) 0%, rgba(10, 14, 24, 0.95) 100%);
-        border: 1px solid rgba(16, 185, 129, 0.35);
-        border-radius: 14px;
-        padding: 10px 14px;
-        margin-top: 10px;
-        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(16, 185, 129, 0.2);
-    }
-    .ai-explore-label {
-        font-size: 0.76rem;
-        font-weight: 700;
-        color: #10B981;
-        margin-bottom: 6px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        letter-spacing: 0.02em;
-    }
-    .ai-explore-input-pill {
-        background: rgba(9, 13, 22, 0.95);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 10px;
-        padding: 8px 14px;
-        font-size: 0.82rem;
-        color: #CBD5E1;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .ai-explore-chevron {
-        color: #10B981;
-        font-weight: bold;
     }
 
     /* Gross Spend Card */
@@ -916,7 +870,6 @@ elif page in ["Home", "Dashboard"]:
                 st.markdown(f"""
                     <div class="card-head-row">
                         <div class="card-main-title">Supply Chain Payments & Costs</div>
-                        <div class="card-dots-btn">•••</div>
                     </div>
                     <div class="stages-metrics-row">
                         <div class="stage-col">
@@ -948,15 +901,7 @@ elif page in ["Home", "Dashboard"]:
                 elif pay_chart_res.unavailable_reason:
                     st.info(f"Payments & Costs: Not available — {pay_chart_res.unavailable_reason}")
 
-                st.markdown("""
-                    <div class="ai-explore-wrap">
-                        <div class="ai-explore-label">✨ What would you like to explore next?</div>
-                        <div class="ai-explore-input-pill">
-                            <span>I want to know what caused the bottleneck in Logistics and how to optimize...</span>
-                            <span class="ai-explore-chevron">⌃</span>
-                        </div>
-                    </div>
-                """, unsafe_allow_html=True)
+
 
         # Right Card: Gross Spend & Optimization
         with r1_col_right:
@@ -964,7 +909,6 @@ elif page in ["Home", "Dashboard"]:
                 st.markdown(f"""
                     <div class="card-head-row">
                         <div class="card-main-title">Gross Spend & Optimization</div>
-                        <div class="card-dots-btn">•••</div>
                     </div>
                     <div class="gross-spend-label">Gross Spend</div>
                     <div class="gross-spend-metric-row">
@@ -1011,7 +955,6 @@ elif page in ["Home", "Dashboard"]:
                 st.markdown("""
                     <div class="card-head-row">
                         <div class="card-main-title">Inventory Flow</div>
-                        <div class="card-dots-btn">•••</div>
                     </div>
                 """, unsafe_allow_html=True)
                 flow_chart_res = plot_zentra_inventory_flow(clean_df)
@@ -1027,7 +970,6 @@ elif page in ["Home", "Dashboard"]:
                     <div class="submetric-card">
                         <div class="submetric-head">
                             <span class="submetric-title">Transactions</span>
-                            <span class="card-dots-btn">•••</span>
                         </div>
                         <div class="submetric-body">
                             <div class="submetric-left">
@@ -1050,7 +992,6 @@ elif page in ["Home", "Dashboard"]:
                     <div class="submetric-card" style="margin-top: 10px;">
                         <div class="submetric-head">
                             <span class="submetric-title">Suppliers Active</span>
-                            <span class="card-dots-btn">•••</span>
                         </div>
                         <div class="submetric-body">
                             <div class="submetric-left">
